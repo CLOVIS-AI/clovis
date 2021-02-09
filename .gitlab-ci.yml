@@ -2,6 +2,21 @@ stages:
   - test
   - deploy
 
+.gradle:
+  before_script:
+    - export GRADLE_USER_HOME=$(pwd)/.gradle
+  cache:
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+server » test:
+  stage: test
+  image: openjdk:11
+  extends: [ .gradle ]
+  script:
+    - "./gradlew :server:test"
+
 telegram:
   stage: deploy
   image: registry.gitlab.com/clovis-ai/dotfiles:latest
