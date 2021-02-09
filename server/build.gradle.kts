@@ -15,6 +15,7 @@ dependencies {
 	implementation(ktor("server-core"))
 	implementation(ktor("server-netty"))
 	implementation(ktor("serialization"))
+	testImplementation(ktor("server-tests"))
 
 	fun kotlinx(name: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$name:$version"
 	implementation(kotlinx("serialization-core", "1.1.0-RC"))
