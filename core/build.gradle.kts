@@ -1,5 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "1.4.21"
+    kotlin("multiplatform")
+    kotlin("plugin.serialization")
 }
 
 repositories {
@@ -15,6 +16,10 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
+
+                fun kotlinx(name: String, version: String) =
+                    "org.jetbrains.kotlinx:kotlinx-$name:$version"
+                api(kotlinx("serialization-core", "1.1.0-RC"))
             }
         }
         val commonTest by getting {
