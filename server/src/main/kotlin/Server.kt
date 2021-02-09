@@ -1,10 +1,19 @@
 package clovis.server
 
-import clovis.core.profile.Profile
-import clovis.core.users.User
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.routing.*
+import io.ktor.serialization.*
+import io.ktor.server.netty.*
 
-fun main() {
-	val user = User(1, Profile("Mel Caller", "mel.caller@email.com"))
+fun main(args: Array<String>) = EngineMain.main(args)
 
-	println("Hello World, ${user.profile.fullName}!")
+fun Application.mainModule() {
+	install(ContentNegotiation) {
+		json()
+	}
+
+	routing {
+		pingRouting()
+	}
 }
