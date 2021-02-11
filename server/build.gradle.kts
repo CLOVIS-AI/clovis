@@ -10,6 +10,8 @@ repositories {
 
 dependencies {
 	implementation(kotlin("stdlib"))
+	testImplementation(kotlin("test"))
+	testImplementation(kotlin("test-junit"))
 
 	fun ktor(name: String) = "io.ktor:ktor-$name:1.5.1"
 	implementation(ktor("server-core"))
