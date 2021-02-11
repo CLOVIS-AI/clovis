@@ -1,4 +1,5 @@
 stages:
+  - build
   - test
   - deploy
 
@@ -10,10 +11,41 @@ stages:
       - .gradle/wrapper
       - .gradle/caches
 
+server » build:
+  stage: build
+  image: openjdk:11
+  extends: [ .gradle ]
+  before_script:
+    - mkdir -p bin/server-zip
+  script:
+    - "./gradlew :server:distZip"
+    - mv server/build/distributions/*.zip bin/server-zip/
+  artifacts:
+    paths:
+      - bin/server-zip/
+
+.requiresServer:
+  needs:
+    - server » build
+  dependencies:
+    - server » build
+  before_script:
+    - mkdir -p bin/server
+    - unzip bin/server-zip/server-*.zip -d bin/server/
+    - ./bin/server/server-*/bin/server &
+
+client » test jvm:
+  stage: test
+  image: openjdk:11
+  extends: [ .gradle, .requiresServer ]
+  script:
+    - "./gradlew :client:jvmTest"
+
 server » test:
   stage: test
   image: openjdk:11
   extends: [ .gradle ]
+  needs: [ ]
   script:
     - "./gradlew :server:test"
 
