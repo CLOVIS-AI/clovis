@@ -1,0 +1,11 @@
+# IntelliJ files
+/artifacts/
+/modules/
+/modules.xml
+/compiler.xml
+/git_toolbox_prj.xml
+/gradle.xml
+/jarRepositories.xml
+/misc.xml
+/vcs.xml
+/workspace.xml
