@@ -2,6 +2,7 @@ plugins {
 	kotlin("jvm")
 	kotlin("plugin.serialization")
 	id("application")
+	id("net.saliman.properties") version "1.5.1"
 
 	id("jacoco")
 	id("de.jansauer.printcoverage") version "2.0.0"
@@ -50,4 +51,16 @@ tasks.jacocoTestReport {
 		csv.isEnabled = false
 		html.isEnabled = true
 	}
+}
+
+tasks.named<JavaExec>("run") {
+	fun property(name: String) = name to project.ext.get(name).toString()
+
+	environment(
+		property("DATABASE_HOST"),
+		property("DATABASE_PORT"),
+		property("DATABASE_NAME"),
+		property("DATABASE_USER"),
+		property("DATABASE_PASSWORD")
+	)
 }
