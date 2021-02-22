@@ -8,6 +8,8 @@ plugins {
 	id("de.jansauer.printcoverage") version "2.0.0"
 }
 
+//region Dependencies
+
 repositories {
 	mavenCentral()
 	jcenter()
@@ -43,6 +45,9 @@ dependencies {
 	implementation(project(":core"))
 }
 
+//endregion
+//region Server execution, tests
+
 application {
 	mainClass.set("clovis.server.ServerKt")
 }
@@ -56,6 +61,9 @@ tasks.jacocoTestReport {
 		html.isEnabled = true
 	}
 }
+
+//endregion
+//region Environment variables
 
 fun JavaForkOptions.requireDatabaseSettings() {
 	fun property(name: String) = name to project.ext.get(name).toString()
@@ -77,8 +85,13 @@ tasks.named<Test>("test") {
 	requireDatabaseSettings()
 }
 
+//endregion
+//region Kotlin configuration
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 	kotlinOptions {
 		jvmTarget = "1.8"
 	}
 }
+
+//endregion
