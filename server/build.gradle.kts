@@ -36,6 +36,10 @@ dependencies {
 
 	implementation("mysql:mysql-connector-java:5.1.48")
 
+	fun arrow(name: String) = "io.arrow-kt:arrow-$name:0.11.0"
+	implementation(arrow("core"))
+	implementation(arrow("syntax"))
+
 	implementation(project(":core"))
 }
 
