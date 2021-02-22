@@ -1,5 +1,7 @@
 package clovis.server.db
 
+import arrow.core.Either
+import clovis.server.DatabaseException
 import clovis.server.dbConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,11 +21,13 @@ suspend fun ensureTablesExist() = withContext(Dispatchers.IO) {
 }
 
 suspend inline fun <T> withDatabaseAsync(crossinline statement: Transaction.() -> T) =
-	suspendedTransactionAsync(Dispatchers.IO, db = dbConnection, transactionIsolation = null) {
-		ensureTablesExist()
+	Either.catch {
+		suspendedTransactionAsync(Dispatchers.IO, db = dbConnection, transactionIsolation = null) {
+			ensureTablesExist()
 
-		statement()
+			statement()
+		}
 	}
 
 suspend inline fun <T> withDatabase(crossinline statement: Transaction.() -> T) =
-	withDatabaseAsync(statement).await()
+	withDatabaseAsync(statement).mapLeft { DatabaseException(it) }.map { it.await() }
