@@ -9,6 +9,7 @@ plugins {
 
 repositories {
 	mavenCentral()
+	jcenter()
 }
 
 dependencies {
@@ -26,6 +27,13 @@ dependencies {
 	implementation(kotlinx("serialization-core", "1.1.0-RC"))
 
 	implementation("ch.qos.logback:logback-classic:1.2.3")
+
+	fun exposed(name: String) = "org.jetbrains.exposed:exposed-$name:0.29.1"
+	implementation(exposed("core"))
+	implementation(exposed("dao"))
+	implementation(exposed("jdbc"))
+
+	implementation("mysql:mysql-connector-java:5.1.48")
 
 	implementation(project(":core"))
 }
