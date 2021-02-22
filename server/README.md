@@ -19,3 +19,5 @@ DATABASE_NAME=clovis
 DATABASE_USER=username
 DATABASE_PASSWORD=password
 ```
+
+You can use the [CI configuration](gradle-local.gitlab.properties) as an example.

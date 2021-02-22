@@ -4,20 +4,32 @@ stages:
   - deploy
 
 .gradle:
-  before_script:
+  script: &prepare_gradle
     - export GRADLE_USER_HOME=$(pwd)/.gradle
+    - cp server/gradle-local.gitlab.properties server/gradle-local.properties
   cache:
     paths:
       - .gradle/wrapper
       - .gradle/caches
 
+.requiresDatabase:
+  services:
+    - mysql
+  variables:
+    MYSQL_DATABASE: clovis
+    MYSQL_ROOT_PASSWORD: super_safe_password
+  script: &prepare_database
+    - apt-get install -y mariadb-client
+    - <server/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
+
 server » build:
   stage: build
-  image: openjdk:11
+  image: openjdk:11-buster
   extends: [ .gradle ]
   before_script:
-    - mkdir -p bin/server-zip
+    - *prepare_gradle
   script:
+    - mkdir -p bin/server-zip
     - "./gradlew :server:distZip"
     - mv server/build/distributions/*.zip bin/server-zip/
   artifacts:
@@ -37,7 +49,10 @@ server » build:
 client » test jvm:
   stage: test
   image: openjdk:11
-  extends: [ .gradle, .requiresServer ]
+  extends: [ .gradle, .requiresServer, .requiresDatabase ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
   script:
     - "./gradlew :client:jvmTest"
   artifacts:
@@ -47,7 +62,10 @@ client » test jvm:
 server » test:
   stage: test
   image: openjdk:11
-  extends: [ .gradle ]
+  extends: [ .gradle, .requiresDatabase ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
   needs: [ ]
   script:
     - "./gradlew :server:test :server:printCoverage"
