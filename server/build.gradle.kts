@@ -36,6 +36,10 @@ dependencies {
 
 	implementation("mysql:mysql-connector-java:5.1.48")
 
+	fun arrow(name: String) = "io.arrow-kt:arrow-$name:0.11.0"
+	implementation(arrow("core"))
+	implementation(arrow("syntax"))
+
 	implementation(project(":core"))
 }
 
@@ -53,7 +57,7 @@ tasks.jacocoTestReport {
 	}
 }
 
-tasks.named<JavaExec>("run") {
+fun JavaForkOptions.requireDatabaseSettings() {
 	fun property(name: String) = name to project.ext.get(name).toString()
 
 	environment(
@@ -63,4 +67,18 @@ tasks.named<JavaExec>("run") {
 		property("DATABASE_USER"),
 		property("DATABASE_PASSWORD")
 	)
+}
+
+tasks.named<JavaExec>("run") {
+	requireDatabaseSettings()
+}
+
+tasks.named<Test>("test") {
+	requireDatabaseSettings()
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+	kotlinOptions {
+		jvmTarget = "1.8"
+	}
 }
