@@ -3,6 +3,11 @@ stages:
   - test
   - deploy
 
+variables:
+  TEST_DB_IMAGE: "$CI_REGISTRY_IMAGE/mariadb-client:$CI_PIPELINE_IID"
+  RELEASE_DB_IMAGE: "$CI_REGISTRY_IMAGE/mariadb-client:latest"
+  OPENJDK_IMAGE: "openjdk:11"
+
 .gradle:
   script: &prepare_gradle
     - export GRADLE_USER_HOME=$(pwd)/.gradle
@@ -12,19 +17,9 @@ stages:
       - .gradle/wrapper
       - .gradle/caches
 
-.requiresDatabase:
-  services:
-    - mysql
-  variables:
-    MYSQL_DATABASE: clovis
-    MYSQL_ROOT_PASSWORD: super_safe_password
-  script: &prepare_database
-    - apt-get install -y mariadb-client
-    - <server/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
-
 server » build:
   stage: build
-  image: openjdk:11-buster
+  image: $OPENJDK_IMAGE
   extends: [ .gradle ]
   before_script:
     - *prepare_gradle
@@ -36,22 +31,61 @@ server » build:
     paths:
       - bin/server-zip/
 
+.dockerBuild:
+  image: docker:20.10.3
+  services:
+    - docker:dind
+  script: &prepare_docker
+    - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+
+docker » build database:
+  stage: build
+  extends: [ .dockerBuild ]
+  before_script:
+    - *prepare_docker
+  script:
+    - docker pull $TEST_DB_IMAGE || true
+    - docker pull $RELEASE_DB_IMAGE || true
+    - >
+      docker build
+      --pull
+      --tag $TEST_DB_IMAGE
+      -f $CI_PROJECT_DIR/docker/database.Dockerfile
+      .
+    - docker push $TEST_DB_IMAGE
+  tags:
+    - docker
+
 .requiresServer:
   needs:
     - server » build
   dependencies:
     - server » build
-  before_script:
+  before_script: &prepare_server
     - mkdir -p bin/server
     - unzip bin/server-zip/server-*.zip -d bin/server/
+    - source server/gradle-local.properties
     - ./bin/server/server-*/bin/server &
+
+.requiresDatabase:
+  services:
+    - mysql
+  variables:
+    MYSQL_DATABASE: clovis
+    MYSQL_ROOT_PASSWORD: super_safe_password
+  script: &prepare_database
+    - <server/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
 
 client » test jvm:
   stage: test
-  image: openjdk:11
+  image: $TEST_DB_IMAGE
   extends: [ .gradle, .requiresServer, .requiresDatabase ]
+  needs:
+    - docker » build database
+    - server » build
   before_script:
     - *prepare_gradle
+    - *prepare_server
     - *prepare_database
   script:
     - "./gradlew :client:jvmTest"
@@ -61,12 +95,11 @@ client » test jvm:
 
 server » test:
   stage: test
-  image: openjdk:11
+  image: $TEST_DB_IMAGE
   extends: [ .gradle, .requiresDatabase ]
   before_script:
     - *prepare_gradle
     - *prepare_database
-  needs: [ ]
   script:
     - "./gradlew :server:test :server:printCoverage"
   artifacts:
