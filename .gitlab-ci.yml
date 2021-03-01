@@ -64,7 +64,8 @@ docker » build database:
   before_script: &prepare_server
     - mkdir -p bin/server
     - unzip bin/server-zip/server-*.zip -d bin/server/
-    - source server/gradle-local.properties
+    - <server/gradle-local.gitlab.properties sed '/^#/b; /^$/b; s/^/export /' >properties
+    - source properties
     - ./bin/server/server-*/bin/server &
 
 .requiresDatabase:
