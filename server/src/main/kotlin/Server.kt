@@ -3,13 +3,25 @@ package clovis.server
 import arrow.core.Either
 import arrow.core.Left
 import arrow.core.Right
+import clovis.server.db.testData
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.runBlocking
 
-fun main(args: Array<String>) = EngineMain.main(args)
+fun main(args: Array<String>) {
+	if ("--test-data" in args) {
+		runBlocking {
+			println(testData())
+		}
+
+		return
+	}
+
+	EngineMain.main(args)
+}
 
 fun Application.mainModule() {
 	install(ContentNegotiation) {
