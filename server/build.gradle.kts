@@ -2,6 +2,9 @@ plugins {
 	kotlin("jvm")
 	kotlin("plugin.serialization")
 	id("application")
+
+	id("jacoco")
+	id("de.jansauer.printcoverage") version "2.0.0"
 }
 
 repositories {
@@ -29,4 +32,14 @@ dependencies {
 
 application {
 	mainClass.set("clovis.server.ServerKt")
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+
+	reports {
+		xml.isEnabled = true
+		csv.isEnabled = false
+		html.isEnabled = true
+	}
 }

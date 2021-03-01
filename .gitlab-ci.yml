@@ -50,10 +50,11 @@ server » test:
   extends: [ .gradle ]
   needs: [ ]
   script:
-    - "./gradlew :server:test"
+    - "./gradlew :server:test :server:printCoverage"
   artifacts:
     reports:
       junit: server/build/test-results/test/**/TEST-*.xml
+  coverage: '/^Coverage:\s(\d+\.\d+%)/'
 
 telegram:
   stage: deploy
