@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Client » Tests (JVM)" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Server » Apply test data" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/client" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
@@ -10,8 +10,8 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="cleanJvmTest" />
-          <option value="jvmTest" />
+          <option value=":server:run" />
+          <option value="--args=&quot;--test-data&quot;" />
         </list>
       </option>
       <option name="vmOptions" value="" />
@@ -19,8 +19,6 @@
     <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Server » Apply test data" run_configuration_type="GradleRunConfiguration" />
-    </method>
+    <method v="2" />
   </configuration>
 </component>

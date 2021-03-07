@@ -11,6 +11,7 @@ class PingTest {
 	fun testPing() {
 		withTestApplication({ mainModule() }) {
 			handleRequest(HttpMethod.Get, "/ping/1").apply {
+				//language=JSON
 				assertEquals(
 					"""{"id":1,"profile":{"fullName":"Mel Caller","email":"mel.caller@email.com"}}""",
 					response.content

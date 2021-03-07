@@ -1,6 +1,5 @@
-package clovis.core.users
+package clovis.core.api
 
-import clovis.core.profile.Profile
 import kotlinx.serialization.Serializable
 
 @Serializable

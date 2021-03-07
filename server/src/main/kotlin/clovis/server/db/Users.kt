@@ -1,7 +1,7 @@
 package clovis.server.db
 
-import clovis.core.profile.Profile
-import clovis.core.users.User
+import clovis.core.api.Profile
+import clovis.core.api.User
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.select
 

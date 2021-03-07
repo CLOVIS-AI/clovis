@@ -11,7 +11,9 @@ suspend fun testData() = withDatabase {
 	Profiles.deleteAll()
 
 	val melCaller = Users.insert { user ->
+		user[id] = 1L
 		user[profile] = Profiles.insertAndGetId { profile ->
+			profile[id] = 1
 			profile[email] = "mel.caller@email.com"
 			profile[fullName] = "Mel Caller"
 		}
