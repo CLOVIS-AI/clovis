@@ -7,8 +7,10 @@ subprojects {
 }
 
 plugins {
+	val kotlinVersion = "1.4.31"
+
 	// These plugins must be declared at the top-level, even if they are not used here.
-	kotlin("multiplatform") version "1.4.30" apply false
-	kotlin("jvm") version "1.4.30" apply false
-	kotlin("plugin.serialization") version "1.4.30" apply false
+	kotlin("multiplatform") version kotlinVersion apply false
+	kotlin("jvm") version kotlinVersion apply false
+	kotlin("plugin.serialization") version kotlinVersion apply false
 }
