@@ -27,7 +27,7 @@ dependencies {
 	testImplementation(ktor("server-tests"))
 
 	fun kotlinx(name: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$name:$version"
-	implementation(kotlinx("serialization-core", "1.1.0-RC"))
+	implementation(kotlinx("serialization-core", "1.1.0"))
 
 	implementation("ch.qos.logback:logback-classic:1.2.3")
 

@@ -19,7 +19,7 @@ kotlin {
 
                 fun kotlinx(name: String, version: String) =
                     "org.jetbrains.kotlinx:kotlinx-$name:$version"
-                api(kotlinx("serialization-core", "1.1.0-RC"))
+                api(kotlinx("serialization-core", "1.1.0"))
             }
         }
         val commonTest by getting {

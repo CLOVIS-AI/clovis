@@ -19,7 +19,7 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				implementation(kotlin("stdlib-common"))
-				implementation(kotlinx("serialization-core", "1.1.0-RC"))
+				implementation(kotlinx("serialization-core", "1.1.0"))
 
 				api(ktor("client-core"))
 				api(ktor("client-serialization"))
