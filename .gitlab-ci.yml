@@ -70,12 +70,12 @@ docker » build database:
 
 .requiresDatabase:
   services:
-    - mysql
+    - mariadb
   variables:
     MYSQL_DATABASE: clovis
     MYSQL_ROOT_PASSWORD: super_safe_password
   script: &prepare_database
-    - <server/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
+    - <server/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb "$MYSQL_DATABASE"
 
 client » test jvm:
   stage: test
