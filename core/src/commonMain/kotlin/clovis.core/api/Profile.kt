@@ -1,4 +1,4 @@
-package clovis.core.profile
+package clovis.core.api
 
 import kotlinx.serialization.Serializable
 

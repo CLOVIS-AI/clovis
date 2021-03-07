@@ -1,8 +1,8 @@
 package clovis.client.users
 
 import clovis.client.runTestWithClient
-import clovis.core.profile.Profile
-import clovis.core.users.User
+import clovis.core.api.Profile
+import clovis.core.api.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

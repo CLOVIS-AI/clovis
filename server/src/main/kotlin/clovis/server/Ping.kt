@@ -1,7 +1,7 @@
 package clovis.server
 
 import arrow.core.computations.either
-import clovis.core.users.User
+import clovis.core.api.User
 import clovis.server.db.Users
 import io.ktor.application.*
 import io.ktor.routing.*
