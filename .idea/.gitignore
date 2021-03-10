@@ -9,3 +9,11 @@
 /misc.xml
 /vcs.xml
 /workspace.xml
+/dataSources/
+/dataSources*
+/caches/
+/*.iml
+/kotlinScripting.xml
+/uiDesigner.xml
+/sqldialects.xml
+/libraries-with-intellij-classes.xml

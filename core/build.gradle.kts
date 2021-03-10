@@ -17,9 +17,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
 
-                fun kotlinx(name: String, version: String) =
-                    "org.jetbrains.kotlinx:kotlinx-$name:$version"
-                api(kotlinx("serialization-core", "1.1.0-RC"))
+                api(kotlinxSerialization("core"))
             }
         }
         val commonTest by getting {

@@ -12,14 +12,10 @@ kotlin {
 
 	@Suppress("UNUSED_VARIABLE")
 	sourceSets {
-		fun ktor(name: String) = "io.ktor:ktor-$name:1.5.1"
-		fun kotlinx(name: String, version: String) =
-			"org.jetbrains.kotlinx:kotlinx-$name:$version"
-
 		val commonMain by getting {
 			dependencies {
 				implementation(kotlin("stdlib-common"))
-				implementation(kotlinx("serialization-core", "1.1.0-RC"))
+				implementation(kotlinxSerialization("core"))
 
 				api(ktor("client-core"))
 				api(ktor("client-serialization"))
