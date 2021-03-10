@@ -4,6 +4,9 @@ include("core")
 include("server")
 include("client")
 include("compose")
+include("compose:common")
+include("compose:android")
+include("compose:desktop")
 
 pluginManagement {
 	repositories {
