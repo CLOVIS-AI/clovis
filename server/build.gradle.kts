@@ -2,10 +2,10 @@ plugins {
 	kotlin("jvm")
 	kotlin("plugin.serialization")
 	id("application")
-	id("net.saliman.properties") version "1.5.1"
+	id("net.saliman.properties") version Version.gradleProperties
 
 	id("jacoco")
-	id("de.jansauer.printcoverage") version "2.0.0"
+	id("de.jansauer.printcoverage") version Version.printCoverage
 }
 
 //region Dependencies
@@ -20,25 +20,21 @@ dependencies {
 	testImplementation(kotlin("test"))
 	testImplementation(kotlin("test-junit"))
 
-	fun ktor(name: String) = "io.ktor:ktor-$name:1.5.1"
 	implementation(ktor("server-core"))
 	implementation(ktor("server-netty"))
 	implementation(ktor("serialization"))
 	testImplementation(ktor("server-tests"))
 
-	fun kotlinx(name: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$name:$version"
-	implementation(kotlinx("serialization-core", "1.1.0"))
+	implementation(kotlinxSerialization("core"))
 
-	implementation("ch.qos.logback:logback-classic:1.2.3")
+	implementation(logback("classic"))
 
-	fun exposed(name: String) = "org.jetbrains.exposed:exposed-$name:0.29.1"
 	implementation(exposed("core"))
 	implementation(exposed("dao"))
 	implementation(exposed("jdbc"))
 
-	implementation("mysql:mysql-connector-java:5.1.48")
+	implementation(mysqlConnector("java"))
 
-	fun arrow(name: String) = "io.arrow-kt:arrow-$name:0.11.0"
 	implementation(arrow("core"))
 	implementation(arrow("syntax"))
 

@@ -22,8 +22,8 @@ kotlin {
 		named("androidMain") {
 			kotlin.srcDirs("src/jvmMain/kotlin")
 			dependencies {
-				api("androidx.appcompat:appcompat:1.3.0-beta01")
-				api("androidx.core:core-ktx:1.3.2")
+				api("androidx.appcompat:appcompat:${Version.appcompat}")
+				api("androidx.core:core-ktx:${Version.androidxCoreKtx}")
 			}
 		}
 		named("desktopMain") {
