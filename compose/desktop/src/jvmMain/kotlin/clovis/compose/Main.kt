@@ -5,6 +5,6 @@ import androidx.compose.ui.unit.IntSize
 
 fun main() {
 	Window(title = "Compose for Desktop", size = IntSize(300, 300)) {
-		HelloWorld()
+		HomeScreen()
 	}
 }

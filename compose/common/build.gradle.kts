@@ -17,6 +17,8 @@ kotlin {
 				api(compose.foundation)
 				api(compose.material)
 				api(compose.materialIconsExtended)
+
+				api(project(":client"))
 			}
 		}
 		named("androidMain") {
