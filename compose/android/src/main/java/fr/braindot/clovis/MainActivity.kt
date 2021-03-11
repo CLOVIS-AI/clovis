@@ -3,7 +3,7 @@ package fr.braindot.clovis
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import clovis.compose.HelloWorld
+import clovis.compose.HomeScreen
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
 		super.onCreate(savedInstanceState)
 
 		setContent {
-			HelloWorld()
+			HomeScreen()
 		}
 	}
 
