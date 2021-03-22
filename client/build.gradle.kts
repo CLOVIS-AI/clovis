@@ -21,6 +21,7 @@ kotlin {
 				api(ktor("client-serialization"))
 				api(ktor("client-json"))
 				api(ktor("client-logging"))
+				api(ktor("client-auth"))
 
 				api(project(":core"))
 			}
