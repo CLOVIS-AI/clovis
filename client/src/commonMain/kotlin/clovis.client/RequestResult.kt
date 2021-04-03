@@ -54,7 +54,7 @@ fun <T> assertIsSuccess(
 	message: (RequestResult<T>) -> String = { "Request failed with $it" }
 ) {
 	contract {
-		returns() implies (request is Success)
+		returns() implies (request is Success<T>)
 	}
 
 	if (request !is Success)

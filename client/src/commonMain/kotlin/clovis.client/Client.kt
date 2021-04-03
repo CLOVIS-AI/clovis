@@ -1,17 +1,25 @@
 package clovis.client
 
+import clovis.client.auth.ClientAuthentication
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.core.*
 
-class Client(val url: Url) : Closeable {
+typealias RequestBuilderDSL = HttpRequestBuilder.() -> Unit
 
-	internal val client = HttpClient {
+class Client(val url: Url, private val auth: ClientAuthentication) : Closeable {
+
+	private val client = HttpClient {
 		install(JsonFeature) {
 			serializer = KotlinxSerializer()
 		}
+
+		with(auth) { install() }
 	}
 
 	/**
