@@ -17,10 +17,11 @@ kotlin {
 				implementation(kotlin("stdlib-common"))
 				implementation(kotlinxSerialization("core"))
 
-				api(ktor("client-core"))
-				api(ktor("client-serialization"))
-				api(ktor("client-json"))
-				api(ktor("client-logging"))
+				api(ktorClient("core"))
+				api(ktorClient("serialization"))
+				api(ktorClient("json"))
+				api(ktorClient("logging"))
+				api(ktorClient("auth"))
 
 				api(project(":core"))
 			}
@@ -34,10 +35,10 @@ kotlin {
 
 		val jvmMain by getting {
 			dependencies {
-				api(ktor("client-cio"))
-				api(ktor("client-json-jvm"))
-				api(ktor("client-serialization-jvm"))
-				api(ktor("client-logging-jvm"))
+				api(ktorClient("cio"))
+				api(ktorClient("json-jvm"))
+				api(ktorClient("serialization-jvm"))
+				api(ktorClient("logging-jvm"))
 			}
 		}
 		val jvmTest by getting {

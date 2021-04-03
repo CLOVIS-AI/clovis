@@ -23,6 +23,7 @@ dependencies {
 	implementation(ktor("server-core"))
 	implementation(ktor("server-netty"))
 	implementation(ktor("serialization"))
+	implementation(ktor("auth"))
 	testImplementation(ktor("server-tests"))
 
 	implementation(kotlinxSerialization("core"))

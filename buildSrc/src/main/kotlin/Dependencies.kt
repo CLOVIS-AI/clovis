@@ -1,6 +1,8 @@
 fun ktor(name: String) =
 	"io.ktor:ktor-$name:${Version.ktor}"
 
+fun ktorClient(name: String) = ktor("client-$name")
+
 fun kotlinxSerialization(name: String) =
 	"org.jetbrains.kotlinx:kotlinx-serialization-$name:${Version.serialization}"
 

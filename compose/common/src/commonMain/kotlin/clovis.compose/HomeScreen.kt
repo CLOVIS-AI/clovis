@@ -9,16 +9,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import clovis.client.Client
+import clovis.client.auth.PasswordAccess
+import clovis.client.successOrNull
 import clovis.client.users.getUser
 import clovis.core.api.User
 import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-val client = Client(Url("http://localhost:8000"))
-
-typealias Setter<T> = (T) -> Unit
-typealias OnClickEvent = () -> Unit
+val client = Client(Url("http://localhost:8000"), PasswordAccess("test", "test")) //TODO
 
 @Suppress("FunctionName")
 @Composable
@@ -43,4 +42,4 @@ fun HomeScreen() {
 private fun loadUserEvent(
 	scope: CoroutineScope,
 	setUser: Setter<User?>
-): OnClickEvent = { scope.launch { setUser(client.getUser(1)) } }
+): OnClickEvent = { scope.launch { setUser(client.getUser(1).successOrNull()) } }
