@@ -5,6 +5,7 @@ import arrow.core.Left
 import arrow.core.Right
 import clovis.server.db.testData
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
@@ -23,9 +24,23 @@ fun main(args: Array<String>) {
 	EngineMain.main(args)
 }
 
+const val KtorAuth = "test"
+
 fun Application.mainModule() {
 	install(ContentNegotiation) {
 		json()
+	}
+
+	install(Authentication) {
+		basic(name = KtorAuth) { // TODO: clean
+			realm = "Test"
+			validate { credentials ->
+				if (credentials.name == "test" && credentials.password == "test")
+					UserIdPrincipal(credentials.name)
+				else
+					null
+			}
+		}
 	}
 
 	routing {
