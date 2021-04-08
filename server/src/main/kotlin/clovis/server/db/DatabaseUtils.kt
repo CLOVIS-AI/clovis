@@ -2,7 +2,6 @@ package clovis.server.db
 
 import arrow.core.Either
 import clovis.server.DatabaseException
-import clovis.server.dbConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.SchemaUtils
