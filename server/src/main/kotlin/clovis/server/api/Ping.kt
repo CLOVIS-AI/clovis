@@ -1,8 +1,12 @@
-package clovis.server
+package clovis.server.api
 
 import arrow.core.computations.either
 import clovis.core.api.User
+import clovis.server.KtorAuth
+import clovis.server.RequestFailure
 import clovis.server.db.Users
+import clovis.server.param
+import clovis.server.respondRequest
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.response.*
@@ -26,4 +30,3 @@ fun Route.pingRouting() {
 		}
 	}
 }
-

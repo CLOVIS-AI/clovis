@@ -3,6 +3,7 @@ package clovis.server
 import arrow.core.Either
 import arrow.core.Left
 import arrow.core.Right
+import clovis.server.api.pingRouting
 import clovis.server.db.testData
 import io.ktor.application.*
 import io.ktor.auth.*
