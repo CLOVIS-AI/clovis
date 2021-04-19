@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.Left
 import arrow.core.Right
 import clovis.server.api.pingRouting
+import clovis.server.api.usersRouting
 import clovis.server.db.testData
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -49,6 +50,7 @@ fun Application.mainModule() {
 
 	routing {
 		pingRouting()
+		usersRouting()
 	}
 }
 
