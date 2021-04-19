@@ -35,7 +35,7 @@ class ParameterType(
 
 }
 
-class DatabaseException(private val exception: Throwable) : RequestFailure() {
+class DatabaseException(val exception: Throwable) : RequestFailure() {
 
 	override suspend fun ApplicationCall.handle() {
 		exception.printStackTrace()

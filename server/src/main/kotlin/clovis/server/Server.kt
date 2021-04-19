@@ -16,7 +16,10 @@ import kotlinx.coroutines.runBlocking
 fun main(args: Array<String>) {
 	if ("--test-data" in args) {
 		runBlocking {
-			println(testData())
+			testData().fold(
+				{ it.exception.printStackTrace() },
+				{ println(it) }
+			)
 		}
 
 		return
