@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
 	EngineMain.main(args)
 }
 
-const val KtorAuth = "test"
+const val KtorAuth = "basic-authentication"
 
 fun Application.mainModule() {
 	install(ContentNegotiation) {
