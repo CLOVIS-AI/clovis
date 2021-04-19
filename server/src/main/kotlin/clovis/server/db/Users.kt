@@ -6,6 +6,7 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.select
 
 object Users : LongIdTable() {
+	val hashedPassword = varchar("hashed_password", 50)
 	val profile = optReference("profile_id", Profiles)
 
 	suspend fun withId(id: Long) = withDatabase {

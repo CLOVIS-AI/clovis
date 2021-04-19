@@ -12,6 +12,7 @@ suspend fun testData() = withDatabase {
 
 	val melCaller = Users.insert { user ->
 		user[id] = 1L
+		user[hashedPassword] = "THIS IS A FAKE HASHED PASSWORD."
 		user[profile] = Profiles.insertAndGetId { profile ->
 			profile[id] = 1
 			profile[email] = "mel.caller@email.com"
