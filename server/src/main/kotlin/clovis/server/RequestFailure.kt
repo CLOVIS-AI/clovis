@@ -35,7 +35,10 @@ class ParameterType(
 
 }
 
-class DatabaseException(val exception: Throwable) : RequestFailure() {
+/**
+ * Something went wrong while accessing the database.
+ */
+sealed class DatabaseException(val exception: Throwable) : RequestFailure() {
 
 	override suspend fun ApplicationCall.handle() {
 		exception.printStackTrace()
@@ -46,6 +49,15 @@ class DatabaseException(val exception: Throwable) : RequestFailure() {
 		)
 	}
 
+	/**
+	 * Something went wrong, but we couldn't recognize why.
+	 */
+	class Unknown(exception: Throwable) : DatabaseException(exception)
+
+	/**
+	 * A database constraint was violated.
+	 */
+	class ConstraintViolation(exception: Throwable) : DatabaseException(exception)
 }
 
 //endregion
