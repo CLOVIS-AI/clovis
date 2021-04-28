@@ -40,7 +40,12 @@ class UserTest {
 		val user1 = createUser()
 		val user2 = createUser()
 
-		assert(user1.isLeft() || user2.isLeft()) { "Was expecting one of the two users to fail (because they are duplicates of each other); found:\n$user1\n$user2" }
+		user1.mapLeft { assert(it is DatabaseException.ConstraintViolation) { "If the user1 fails, it should fail because of a constraint violation: $it" } }
+
+		user2.fold(
+			{ assert(it is DatabaseException.ConstraintViolation) { "Expected to fail with a ConstraintViolation, failed with: $it" } },
+			{ assert(false) { "The user should have failed BEFORE now: $it" } }
+		)
 	}
 
 }
