@@ -1,4 +1,4 @@
-rootProject.name = "clovis"
+rootProject.name = "The CLOVIS Assistant"
 
 include("core")
 include("server")
