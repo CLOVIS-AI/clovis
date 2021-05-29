@@ -3,6 +3,7 @@ package clovis.server
 import clovis.server.api.pingRouting
 import clovis.server.api.usersRouting
 import clovis.server.db.testData
+import clovis.server.utils.configure
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -26,23 +27,13 @@ fun main(args: Array<String>) {
 	EngineMain.main(args)
 }
 
-const val KtorAuth = "basic-authentication"
-
 fun Application.mainModule() {
 	install(ContentNegotiation) {
 		json()
 	}
 
 	install(Authentication) {
-		basic(name = KtorAuth) { // TODO: clean
-			realm = "Test"
-			validate { credentials ->
-				if (credentials.name == "test" && credentials.password == "test")
-					UserIdPrincipal(credentials.name)
-				else
-					null
-			}
-		}
+		configure()
 	}
 
 	routing {

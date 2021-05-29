@@ -1,6 +1,7 @@
 package clovis.server.api
 
-import clovis.server.KtorAuth
+import clovis.server.utils.KtorAuth
+import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.routing.*
 
