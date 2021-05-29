@@ -110,6 +110,21 @@ server » test:
       junit: server/build/test-results/test/**/TEST-*.xml
   coverage: '/^Coverage:\s(\d+\.\d+%)/'
 
+database » test:
+  stage: test
+  image: $TEST_DB_IMAGE
+  extends: [ .gradle, .requiresDatabase ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - "./gradlew :server:run --args='--test-data'"
+    - "./gradlew :database:test :database:printCoverage"
+  artifacts:
+    reports:
+      junit: server/build/test-results/test/**/TEST-*.xml
+  coverage: '/^Coverage:\s(\d+\.\d+%)/'
+
 telegram:
   stage: deploy
   image: registry.gitlab.com/clovis-ai/dotfiles:latest
