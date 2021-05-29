@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 private var createdTables = false
 suspend fun ensureTablesExist() = withContext(Dispatchers.IO) {
@@ -22,13 +22,15 @@ suspend fun ensureTablesExist() = withContext(Dispatchers.IO) {
 	createdTables = true
 }
 
-suspend inline fun <T> withDatabase(crossinline statement: Transaction.() -> T): Either<DatabaseException, T> =
+suspend inline fun <T> withDatabase(crossinline statement: suspend Transaction.() -> T): Either<DatabaseException, T> =
 	try {
-		Right(suspendedTransactionAsync(Dispatchers.IO, db = dbConnection, transactionIsolation = null) {
+		val result = newSuspendedTransaction(Dispatchers.IO, db = dbConnection, transactionIsolation = null) {
 			ensureTablesExist()
 
 			statement()
-		}.await())
+		}
+
+		Right(result)
 	} catch (e: ExposedSQLException) {
 		val failure = when {
 			e.message?.contains("MySQLIntegrityConstraintViolationException") == true -> DatabaseException.ConstraintViolation(
