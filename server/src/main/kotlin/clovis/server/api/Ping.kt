@@ -2,10 +2,10 @@ package clovis.server.api
 
 import arrow.core.computations.either
 import clovis.core.api.User
-import clovis.server.KtorAuth
 import clovis.server.RequestFailure
 import clovis.server.db.Users
 import clovis.server.respondRequest
+import clovis.server.utils.RegularAuth
 import clovis.server.utils.routeParam
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -23,7 +23,7 @@ fun Route.pingRouting() {
 			call.respondRequest(result)
 		}
 
-		authenticate(KtorAuth) {
+		authenticate(RegularAuth) {
 			get("/auth") {
 				call.respond("Authentication successful")
 			}

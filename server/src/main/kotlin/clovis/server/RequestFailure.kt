@@ -61,4 +61,13 @@ sealed class DatabaseException(val exception: Throwable) : RequestFailure() {
 	class ConstraintViolation(exception: Throwable) : DatabaseException(exception)
 }
 
+/**
+ * Missing authentication for a specific authentication [realm].
+ */
+data class InvalidAuthentication(val realm: String) : RequestFailure() {
+	override suspend fun ApplicationCall.handle() {
+		respondText("Couldn't get authentication for realm '$realm'", status = HttpStatusCode.Forbidden)
+	}
+}
+
 //endregion
