@@ -1,6 +1,7 @@
 package clovis.server.api
 
-import clovis.server.utils.KtorAuth
+import clovis.server.utils.RegularAuth
+import clovis.server.utils.credentialsForRegular
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.routing.*
@@ -11,8 +12,10 @@ fun Route.usersRouting() {
 			//TODO: create a user from their info
 		}
 
-		authenticate(KtorAuth) {
+		authenticate(RegularAuth) {
 			get("/me") {
+				val principal = call.credentialsForRegular()
+
 				//TODO: get my personal info
 			}
 
