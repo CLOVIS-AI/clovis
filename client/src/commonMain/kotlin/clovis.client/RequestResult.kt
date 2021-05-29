@@ -2,8 +2,6 @@ package clovis.client
 
 import io.ktor.client.features.*
 import io.ktor.http.*
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 /**
  * Represents the result or failure of a request.
@@ -36,27 +34,4 @@ fun <T> RequestResult<T>.successOrNull() = when (this) {
 		println("Failed result has been ignored by 'successOrNull': $this")
 		null
 	}
-}
-
-/**
- * Asserts that a [request] is successful, failing and printing a [message] if it isn't.
- *
- * A call to this function is semantically equivalent to:
- * ```kotlin
- * val request: RequestResult<T> = …
- * assert(request is Success)
- * val request = request as Success
- * ```
- */
-@OptIn(ExperimentalContracts::class)
-fun <T> assertIsSuccess(
-	request: RequestResult<T>,
-	message: (RequestResult<T>) -> String = { "Request failed with $it" }
-) {
-	contract {
-		returns() implies (request is Success<T>)
-	}
-
-	if (request !is Success)
-		throw AssertionError(message)
 }
