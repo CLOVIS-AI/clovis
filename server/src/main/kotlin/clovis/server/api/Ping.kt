@@ -5,8 +5,8 @@ import clovis.core.api.User
 import clovis.server.KtorAuth
 import clovis.server.RequestFailure
 import clovis.server.db.Users
-import clovis.server.param
 import clovis.server.respondRequest
+import clovis.server.utils.param
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.response.*
