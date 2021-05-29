@@ -1,4 +1,4 @@
-package clovis.server.db
+package clovis.server.db.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 

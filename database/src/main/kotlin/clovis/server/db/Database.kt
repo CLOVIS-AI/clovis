@@ -11,7 +11,7 @@ private val databaseName = env("DATABASE_NAME")
 private val databaseUser = env("DATABASE_USER")
 private val databasePassword = env("DATABASE_PASSWORD")
 
-val dbConnection = Database.connect(
+internal val dbConnection = Database.connect(
 	url = "jdbc:mysql://$databaseHost:$databasePort/$databaseName",
 	driver = "com.mysql.jdbc.Driver",
 	user = databaseUser,
