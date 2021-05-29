@@ -19,7 +19,7 @@ class ClientTest {
 	fun testPingAuth() = runTestWithClient(auth = PasswordAccess("test", "test")) {
 		val request = get<String>("$url/ping/auth")
 
-		assertIsSuccess(request)
+		assertTrue(request is Success)
 		assertEquals("Authentication successful", request.result)
 	}
 

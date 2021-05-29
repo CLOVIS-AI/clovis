@@ -1,4 +1,4 @@
-package clovis.server
+package clovis.server.db
 
 import org.jetbrains.exposed.sql.Database
 
