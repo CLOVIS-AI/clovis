@@ -75,7 +75,7 @@ docker » build database:
     MYSQL_DATABASE: clovis
     MYSQL_ROOT_PASSWORD: super_safe_password
   script: &prepare_database
-    - <server/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb "$MYSQL_DATABASE"
+    - <database/src/main/resources/sql/init.sql mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb "$MYSQL_DATABASE"
 
 client » test jvm:
   stage: test
@@ -105,6 +105,21 @@ server » test:
   script:
     - "./gradlew :server:run --args='--test-data'"
     - "./gradlew :server:test :server:printCoverage"
+  artifacts:
+    reports:
+      junit: server/build/test-results/test/**/TEST-*.xml
+  coverage: '/^Coverage:\s(\d+\.\d+%)/'
+
+database » test:
+  stage: test
+  image: $TEST_DB_IMAGE
+  extends: [ .gradle, .requiresDatabase ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - "./gradlew :server:run --args='--test-data'"
+    - "./gradlew :database:test :database:printCoverage"
   artifacts:
     reports:
       junit: server/build/test-results/test/**/TEST-*.xml

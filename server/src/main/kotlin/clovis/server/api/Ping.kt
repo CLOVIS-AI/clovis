@@ -2,8 +2,9 @@ package clovis.server.api
 
 import arrow.core.computations.either
 import clovis.core.api.User
+import clovis.server.DatabaseFailure.Companion.asRequest
 import clovis.server.RequestFailure
-import clovis.server.db.Users
+import clovis.server.db.tables.Users
 import clovis.server.respondRequest
 import clovis.server.utils.RegularAuth
 import clovis.server.utils.routeParam
@@ -17,7 +18,7 @@ fun Route.pingRouting() {
 		get("/anonymous/{id}") {
 			val result = either<RequestFailure, User> {
 				val id = !call.routeParam<Long>("id")
-				!Users.withId(id)
+				!Users.withId(id).asRequest()
 			}
 
 			call.respondRequest(result)

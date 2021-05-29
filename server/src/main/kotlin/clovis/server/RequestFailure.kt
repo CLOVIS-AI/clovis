@@ -1,5 +1,7 @@
 package clovis.server
 
+import arrow.core.Either
+import clovis.server.db.DatabaseProblem
 import clovis.server.utils.Request
 import io.ktor.application.*
 import io.ktor.http.*
@@ -39,10 +41,10 @@ class ParameterType(
 /**
  * Something went wrong while accessing the database.
  */
-sealed class DatabaseException(val exception: Throwable) : RequestFailure() {
+data class DatabaseFailure(val underlyingException: DatabaseProblem) : RequestFailure() {
 
 	override suspend fun ApplicationCall.handle() {
-		exception.printStackTrace()
+		underlyingException.exception.printStackTrace()
 
 		return respondText(
 			"A database exception happened during handling",
@@ -50,15 +52,9 @@ sealed class DatabaseException(val exception: Throwable) : RequestFailure() {
 		)
 	}
 
-	/**
-	 * Something went wrong, but we couldn't recognize why.
-	 */
-	class Unknown(exception: Throwable) : DatabaseException(exception)
-
-	/**
-	 * A database constraint was violated.
-	 */
-	class ConstraintViolation(exception: Throwable) : DatabaseException(exception)
+	companion object {
+		fun <T> Either<DatabaseProblem, T>.asRequest(): Request<T> = mapLeft { DatabaseFailure(it) }
+	}
 }
 
 /**

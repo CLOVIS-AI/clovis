@@ -2,7 +2,7 @@ package clovis.server
 
 import clovis.server.api.pingRouting
 import clovis.server.api.usersRouting
-import clovis.server.db.testData
+import clovis.server.db.tables.testData
 import clovis.server.utils.configure
 import io.ktor.application.*
 import io.ktor.auth.*

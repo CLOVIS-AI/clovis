@@ -1,6 +1,7 @@
 rootProject.name = "The CLOVIS Assistant"
 
 include("core")
+include("database")
 include("server")
 include("client")
 include("compose")
