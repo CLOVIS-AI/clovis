@@ -7,4 +7,5 @@ plugins {
 include(
 	"api:core",
 	"api:lib",
+	"money:core",
 )
