@@ -2,6 +2,7 @@
 
 plugins {
 	kotlin("multiplatform")
+	kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -14,6 +15,8 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				api("org.jetbrains.kotlinx:kotlinx-coroutines-core:_")
+
+				implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:_")
 			}
 		}
 	}
