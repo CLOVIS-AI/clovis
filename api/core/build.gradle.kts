@@ -17,6 +17,8 @@ kotlin {
 				api("org.jetbrains.kotlinx:kotlinx-coroutines-core:_")
 
 				implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:_")
+
+				implementation("org.jetbrains.kotlinx:kotlinx-datetime:_")
 			}
 		}
 	}
