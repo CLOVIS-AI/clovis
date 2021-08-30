@@ -13,8 +13,7 @@ kotlin {
 	sourceSets {
 		val commonMain by getting {
 			dependencies {
-				implementation(project(":api:core"))
-				implementation(project(":money:core"))
+				implementation(project(":core"))
 			}
 		}
 	}

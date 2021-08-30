@@ -5,8 +5,8 @@ plugins {
 }
 
 include(
-	"api:core",
-	"api:lib",
-	"api:test",
-	"money:core",
+	"core",
+	"core-test",
+	"lib",
+	"money",
 )
