@@ -47,3 +47,19 @@ sealed class Result<I : Id, out O : Identifiable<I>> {
 	 */
 	data class Unavailable<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
 }
+
+//region Extensions
+
+/**
+ * Whether this [Result] can be considered successful.
+ *
+ * `true` if it is a [Result.Success], `null` if it is a [Result.Loading], and `false` otherwise.
+ */
+val Result<*, *>.success: Boolean?
+	get() = when (this) {
+		is Result.Loading -> null
+		is Result.Success -> true
+		else -> false
+	}
+
+//endregion
