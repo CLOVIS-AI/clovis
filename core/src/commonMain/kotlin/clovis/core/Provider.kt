@@ -1,7 +1,6 @@
 package clovis.core
 
 import clovis.core.cache.Cache
-import clovis.core.cache.IdBound
 
 /**
  * An object that is able to asynchronously query an external resource to get some data.

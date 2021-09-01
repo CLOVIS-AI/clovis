@@ -1,7 +1,6 @@
 package clovis.core
 
 import clovis.core.cache.CacheResult
-import clovis.core.cache.IdBound
 
 /**
  * Represents a result from an API, with common cases as subtypes.

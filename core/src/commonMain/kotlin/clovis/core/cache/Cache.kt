@@ -1,11 +1,11 @@
 package clovis.core.cache
 
+import clovis.core.IdBound
 import clovis.core.Identifiable
 import clovis.core.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-typealias IdBound = Any
 typealias CacheResult<Id, O> = Flow<Result<Id, O>>
 typealias MutableCacheResult<Id, O> = MutableStateFlow<Result<Id, O>>
 

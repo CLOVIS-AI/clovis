@@ -1,5 +1,6 @@
 package clovis.core.cache
 
+import clovis.core.IdBound
 import clovis.core.Identifiable
 import clovis.core.Provider
 import kotlinx.coroutines.CoroutineScope
