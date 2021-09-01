@@ -6,10 +6,9 @@ import clovis.core.Result
 import clovis.test.runTest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.jvm.JvmInline
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -17,12 +16,13 @@ import kotlin.test.assertIs
 class MemoryCacheTest {
 
 	//region Test provider
-	private class Id(override val id: Int) : Identifiable<Int>
+	@JvmInline
+	private value class IntId(val value: Int) : clovis.core.Id
+	private class Id(override val id: IntId) : Identifiable<IntId>
 
-	private val provider = object : Provider<Int, Id> {
-		override suspend fun request(id: Int): Result<Int, Id> {
-			delay(100)
-			return if (id > 0) Result.Success(Id(id))
+	private val provider = object : Provider<IntId, Id> {
+		override suspend fun request(id: IntId): Result<IntId, Id> {
+			return if (id.value > 0) Result.Success(Id(id))
 			else Result.NotFound(id, "Negative ids are not allowed: $id")
 		}
 	}
@@ -35,42 +35,40 @@ class MemoryCacheTest {
 	fun get() = runTest {
 		val cache = testCache()
 
-		val result = cache[1]
+		val result = cache[IntId(1)]
 			.onEach { println(it) }
 			.first { it !is Result.Loading }
 
-		assertIs<Result.Success<Int, Id>>(result)
-		assertEquals(1, result.id)
-		assertEquals(1, result.value.id)
+		assertIs<Result.Success<IntId, Id>>(result)
+		assertEquals(1, result.id.value)
+		assertEquals(1, result.value.id.value)
 	}
 
 	@Test
 	fun getError() = runTest {
 		val cache = testCache()
 
-		val result = cache[-1]
+		val result = cache[IntId(-1)]
 			.onEach { println(it) }
 			.first { it !is Result.Loading }
 
-		assertIs<Result.NotFound<Int>>(result)
-		assertEquals(-1, result.id)
+		assertIs<Result.NotFound<IntId>>(result)
+		assertEquals(-1, result.id.value)
 	}
 
 	@Test
 	fun update() = runTest {
 		val cache = testCache()
 
-		cache.update(Id(1))
+		cache.update(Id(IntId(1)))
 
-		val result = withTimeoutOrNull(50) {
-			cache[1]
-				.onEach { println(it) }
-				.first { it !is Result.Loading }
-		} ?: error("Couldn't get the value we wanted in time, 'update' didn't set the value correctly")
+		val result = cache[IntId(1)]
+			.onEach { println(it) }
+			.first { it !is Result.Loading }
 
-		assertIs<Result.Success<Int, Id>>(result)
-		assertEquals(1, result.id)
-		assertEquals(1, result.value.id)
+		assertIs<Result.Success<IntId, Id>>(result)
+		assertEquals(1, result.id.value)
+		assertEquals(1, result.value.id.value)
 	}
 
 }

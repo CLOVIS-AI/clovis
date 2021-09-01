@@ -1,12 +1,12 @@
 package clovis.core.cache
 
-import clovis.core.IdBound
+import clovis.core.Id
 import clovis.core.Identifiable
 import clovis.core.Provider
 import kotlinx.coroutines.CoroutineScope
 
-fun <Id : IdBound, O : Identifiable<Id>> Provider<Id, O>.cached() =
+fun <I : Id, O : Identifiable<I>> Provider<I, O>.cached() =
 	DirectCache(this)
 
-fun <Id : IdBound, O : Identifiable<Id>> Cache<Id, O>.cachedInMemory(scope: CoroutineScope) =
+fun <Id : clovis.core.Id, O : Identifiable<Id>> Cache<Id, O>.cachedInMemory(scope: CoroutineScope) =
 	MemoryCache(this, scope)

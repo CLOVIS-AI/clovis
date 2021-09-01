@@ -5,19 +5,19 @@ import clovis.core.cache.CacheResult
 /**
  * Represents a result from an API, with common cases as subtypes.
  */
-sealed class Result<Id : IdBound, out O : Identifiable<Id>> {
+sealed class Result<I : Id, out O : Identifiable<I>> {
 
 	/**
 	 * The ID of the object that was requested.
 	 *
 	 * @see Identifiable.id
 	 */
-	abstract val id: Id
+	abstract val id: I
 
 	/**
 	 * The [requested object][value] was successfully found.
 	 */
-	data class Success<Id : IdBound, O : Identifiable<Id>>(val value: O) : Result<Id, O>() {
+	data class Success<I : Id, O : Identifiable<I>>(val value: O) : Result<I, O>() {
 		override val id get() = value.id
 	}
 
@@ -26,24 +26,24 @@ sealed class Result<Id : IdBound, out O : Identifiable<Id>> {
 	 *
 	 * This type is used as the default state for [CacheResult], for example.
 	 */
-	data class Loading<Id : IdBound, O : Identifiable<Id>>(
-		override val id: Id,
-		val lastKnownValue: Result<Id, O>?,
-	) : Result<Id, O>()
+	data class Loading<I : Id, O : Identifiable<I>>(
+		override val id: I,
+		val lastKnownValue: Result<I, O>?,
+	) : Result<I, O>()
 
 	/**
 	 * The request couldn't complete, because the provided [id] doesn't match with any existing object.
 	 */
-	data class NotFound<Id : IdBound>(override val id: Id, val message: String?) : Result<Id, Nothing>()
+	data class NotFound<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
 
 	/**
 	 * The request couldn't complete, because the provided credentials are insufficient to warrant a reply.
 	 * The requested object may or may not exist.
 	 */
-	data class Unauthorized<Id : IdBound>(override val id: Id, val message: String?) : Result<Id, Nothing>()
+	data class Unauthorized<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
 
 	/**
 	 * The request couldn't complete, because the server is currently unavailable (no internet connection, server down…).
 	 */
-	data class Unavailable<Id : IdBound>(override val id: Id, val message: String?) : Result<Id, Nothing>()
+	data class Unavailable<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
 }

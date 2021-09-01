@@ -1,6 +1,6 @@
 package clovis.core.cache
 
-import clovis.core.IdBound
+import clovis.core.Id
 import clovis.core.Identifiable
 import clovis.core.Provider
 import clovis.core.Result
@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.flow
  *
  * This implementation can be used as a bridge between more useful cache implementations and a [Provider].
  */
-class DirectCache<Id : IdBound, O : Identifiable<Id>>(
-	private val provider: Provider<Id, O>,
-) : Cache<Id, O> {
+class DirectCache<I : Id, O : Identifiable<I>>(
+	private val provider: Provider<I, O>,
+) : Cache<I, O> {
 
-	override fun get(id: Id): CacheResult<Id, O> = flow {
+	override fun get(id: I): CacheResult<I, O> = flow {
 		// Emit a 'loading' value instantly
 		emit(Result.Loading(id, lastKnownValue = null))
 
@@ -25,5 +25,5 @@ class DirectCache<Id : IdBound, O : Identifiable<Id>>(
 
 	override suspend fun updateAll(values: Collection<O>) = Unit
 
-	override suspend fun expire(id: Id) = Unit
+	override suspend fun expire(id: I) = Unit
 }

@@ -1,7 +1,11 @@
 package clovis.core
 
-typealias IdBound = Any
+import clovis.core.cache.Cache
 
-interface Identifiable<Id : IdBound> {
-	val id: Id
+interface Id
+
+interface Identifiable<I : Id> {
+	val id: I
 }
+
+fun <I : Id, O : Identifiable<I>> I.from(cache: Cache<I, O>) = cache[this]

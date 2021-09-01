@@ -7,18 +7,18 @@ import clovis.core.cache.Cache
  *
  * @see CachedProvider
  */
-interface Provider<Id : IdBound, O : Identifiable<Id>> {
+interface Provider<I : Id, O : Identifiable<I>> {
 
 	/**
 	 * Request the object identified by [id].
 	 */
-	suspend fun request(id: Id): Result<Id, O>
+	suspend fun request(id: I): Result<I, O>
 
 }
 
-interface CachedProvider<Id : IdBound, O : Identifiable<Id>> {
+interface CachedProvider<I : Id, O : Identifiable<I>> {
 
-	val provider: Provider<Id, O>
-	val cache: Cache<Id, O>
+	val provider: Provider<I, O>
+	val cache: Cache<I, O>
 
 }

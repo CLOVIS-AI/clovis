@@ -1,6 +1,6 @@
 package clovis.core.cache
 
-import clovis.core.IdBound
+import clovis.core.Id
 import clovis.core.Identifiable
 import clovis.core.Result
 import kotlinx.coroutines.CoroutineScope
@@ -16,14 +16,14 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class MemoryCache<Id : IdBound, O : Identifiable<Id>> constructor(
-	private val upstream: Cache<Id, O>,
+class MemoryCache<I : Id, O : Identifiable<I>> constructor(
+	private val upstream: Cache<I, O>,
 	private val scope: CoroutineScope,
 	private val staleAfter: Duration = Duration.minutes(3),
 	private val expiredAfter: Duration = Duration.minutes(30),
-) : Cache<Id, O> {
+) : Cache<I, O> {
 
-	private val data = HashMap<Id, MutableStateFlow<CacheEntry<Id, O>>>()
+	private val data = HashMap<I, MutableStateFlow<CacheEntry<I, O>>>()
 	private val lock = Semaphore(1)
 
 	init {
@@ -45,11 +45,11 @@ class MemoryCache<Id : IdBound, O : Identifiable<Id>> constructor(
 		}
 	}
 
-	private fun unsafeGet(id: Id) = data.getOrPut(id) {
+	private fun unsafeGet(id: I) = data.getOrPut(id) {
 		MutableStateFlow(CacheEntry(null))
 	}
 
-	private fun requestProvider(element: MutableStateFlow<CacheEntry<Id, O>>, id: Id) {
+	private fun requestProvider(element: MutableStateFlow<CacheEntry<I, O>>, id: I) {
 		require(scope.isActive) { "This cache currently doesn't have an active job, which makes it unable to function properly." }
 
 		// Start of the request, set state to 'loading'
@@ -70,7 +70,7 @@ class MemoryCache<Id : IdBound, O : Identifiable<Id>> constructor(
 		}
 	}
 
-	override fun get(id: Id): CacheResult<Id, O> = flow {
+	override fun get(id: I): CacheResult<I, O> = flow {
 		emit(Result.Loading(id, lastKnownValue = null))
 
 		emitAll(lock.withPermit {
@@ -95,7 +95,7 @@ class MemoryCache<Id : IdBound, O : Identifiable<Id>> constructor(
 		}
 	}
 
-	override suspend fun expire(id: Id) {
+	override suspend fun expire(id: I) {
 		lock.withPermit {
 			val element = unsafeGet(id)
 			element.value = CacheEntry(element.value.obj, Instant.DISTANT_PAST)
@@ -103,7 +103,7 @@ class MemoryCache<Id : IdBound, O : Identifiable<Id>> constructor(
 	}
 }
 
-private data class CacheEntry<Id : IdBound, O : Identifiable<Id>>(
+private data class CacheEntry<Id : clovis.core.Id, O : Identifiable<Id>>(
 	val obj: Result<Id, O>?,
 	val timestamp: Instant = Clock.System.now(),
 )

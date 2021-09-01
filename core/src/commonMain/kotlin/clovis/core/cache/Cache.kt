@@ -1,6 +1,6 @@
 package clovis.core.cache
 
-import clovis.core.IdBound
+import clovis.core.Id
 import clovis.core.Identifiable
 import clovis.core.Result
 import kotlinx.coroutines.flow.Flow
@@ -24,14 +24,14 @@ typealias MutableCacheResult<Id, O> = MutableStateFlow<Result<Id, O>>
  * - Stale: an old value is available immediately, which will be replaced by an up-to-date version as soon as it is available ([Result.Loading] with a [Result.Loading.lastKnownValue]),
  * - Expired: no values are available ([Result.Loading] without a [Result.Loading.lastKnownValue]).
  */
-interface Cache<Id : IdBound, O : Identifiable<Id>> {
+interface Cache<I : Id, O : Identifiable<I>> {
 
 	/**
 	 * Get the object identified by the provided [id].
 	 *
 	 * Depending on the implementation, this may or may not use local memory, storage, or perform a network request.
 	 */
-	operator fun get(id: Id): CacheResult<Id, O>
+	operator fun get(id: I): CacheResult<I, O>
 
 	/**
 	 * Provide a [value] to the cache as up-to-date information.
@@ -57,14 +57,14 @@ interface Cache<Id : IdBound, O : Identifiable<Id>> {
 	 *
 	 * @see forceRefresh
 	 */
-	suspend fun expire(id: Id)
+	suspend fun expire(id: I)
 
 	/**
 	 * Gets a value that is guaranteed to be up-to-date.
 	 *
 	 * Convenience method for [expire] followed by [get].
 	 */
-	suspend fun forceRefresh(id: Id): CacheResult<Id, O> {
+	suspend fun forceRefresh(id: I): CacheResult<I, O> {
 		expire(id)
 		return get(id)
 	}
