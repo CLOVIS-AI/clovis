@@ -11,6 +11,21 @@ variables:
       - .gradle/wrapper
       - .gradle/caches
 
+core-jvm-test:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+  script:
+    - ./gradlew core:jvmTest
+  artifacts:
+    reports:
+      junit: core/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - core/build/reports/tests/
+
 telegram:
   stage: deploy
   image: registry.gitlab.com/clovis-ai/dotfiles:latest
