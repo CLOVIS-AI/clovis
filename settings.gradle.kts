@@ -1,17 +1,12 @@
-rootProject.name = "The CLOVIS Assistant"
+rootProject.name = "CLOVIS"
 
-include("core")
-include("database")
-include("server")
-include("client")
-include("compose")
-include("compose:common")
-include("compose:android")
-include("compose:desktop")
-
-pluginManagement {
-	repositories {
-		gradlePluginPortal()
-		maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-	}
+plugins {
+	id("de.fayard.refreshVersions") version "0.11.0"
 }
+
+include(
+	"core",
+	"core-test",
+	"lib",
+	"money",
+)
