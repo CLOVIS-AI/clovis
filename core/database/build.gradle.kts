@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-	api(project(":core"))
+	api(project(":core:primitives"))
 
 	// Apache Cassandra drivers, by DataStax
 	api("com.datastax.oss:java-driver-core:_")
