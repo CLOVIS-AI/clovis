@@ -7,6 +7,7 @@ plugins {
 include(
 	"core",
 	"core-test",
+	"core-database",
 	"lib",
 	"money",
 )
