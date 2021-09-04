@@ -21,5 +21,9 @@ interface Denomination {
 	 *
 	 * @see Money.toString
 	 */
-	fun toString(sum: Long, includeSymbol: Boolean = true): String
+	fun toString(sum: Long, includeSymbol: Boolean = true): String = when {
+		includeSymbol && symbolBeforeValue -> "$symbol$sum"
+		includeSymbol && !symbolBeforeValue -> "$sum$symbol"
+		else -> "$sum"
+	}
 }
