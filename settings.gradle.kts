@@ -9,5 +9,6 @@ include(
 	"core:primitives",
 	"core:test",
 	"core:database",
+	"core.logger",
 	"money",
 )
