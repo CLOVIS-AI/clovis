@@ -11,4 +11,5 @@ include(
 	"core:database",
 	"core.logger",
 	"money",
+	"money.database",
 )
