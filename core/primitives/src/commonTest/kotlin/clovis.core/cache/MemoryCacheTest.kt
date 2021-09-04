@@ -1,6 +1,6 @@
 package clovis.core.cache
 
-import clovis.core.Identifiable
+import clovis.core.Id
 import clovis.core.Provider
 import clovis.core.Result
 import clovis.test.runTest
@@ -17,12 +17,11 @@ class MemoryCacheTest {
 
 	//region Test provider
 	@JvmInline
-	private value class IntId(val value: Int) : clovis.core.Id
-	private class Id(override val id: IntId) : Identifiable<IntId>
+	private value class IntId(val value: Int) : Id<Int>
 
-	private val provider = object : Provider<IntId, Id> {
-		override suspend fun request(id: IntId): Result<IntId, Id> {
-			return if (id.value > 0) Result.Success(Id(id))
+	private val provider = object : Provider<IntId, Int> {
+		override suspend fun request(id: IntId): Result<IntId, Int> {
+			return if (id.value > 0) Result.Success(id, id.value)
 			else Result.NotFound(id, "Negative ids are not allowed: $id")
 		}
 	}
@@ -39,9 +38,9 @@ class MemoryCacheTest {
 			.onEach { println(it) }
 			.first { it !is Result.Loading }
 
-		assertIs<Result.Success<IntId, Id>>(result)
+		assertIs<Result.Success<IntId, Int>>(result)
 		assertEquals(1, result.id.value)
-		assertEquals(1, result.value.id.value)
+		assertEquals(1, result.value)
 	}
 
 	@Test
@@ -52,7 +51,7 @@ class MemoryCacheTest {
 			.onEach { println(it) }
 			.first { it !is Result.Loading }
 
-		assertIs<Result.NotFound<IntId>>(result)
+		assertIs<Result.NotFound<IntId, Int>>(result)
 		assertEquals(-1, result.id.value)
 	}
 
@@ -60,15 +59,15 @@ class MemoryCacheTest {
 	fun update() = runTest {
 		val cache = testCache()
 
-		cache.update(Id(IntId(1)))
+		cache.update(IntId(1), 1)
 
 		val result = cache[IntId(1)]
 			.onEach { println(it) }
 			.first { it !is Result.Loading }
 
-		assertIs<Result.Success<IntId, Id>>(result)
+		assertIs<Result.Success<IntId, Int>>(result)
 		assertEquals(1, result.id.value)
-		assertEquals(1, result.value.id.value)
+		assertEquals(1, result.value)
 	}
 
 }

@@ -1,7 +1,6 @@
 package clovis.core.cache
 
 import clovis.core.Id
-import clovis.core.Identifiable
 import clovis.core.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -16,7 +15,7 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class MemoryCache<I : Id, O : Identifiable<I>> constructor(
+class MemoryCache<I : Id<O>, O> constructor(
 	private val upstream: Cache<I, O>,
 	private val scope: CoroutineScope,
 	private val staleAfter: Duration = Duration.minutes(3),
@@ -87,10 +86,10 @@ class MemoryCache<I : Id, O : Identifiable<I>> constructor(
 		})
 	}
 
-	override suspend fun updateAll(values: Collection<O>) {
+	override suspend fun updateAll(values: Collection<Pair<I, O>>) {
 		lock.withPermit {
-			for (value in values) {
-				unsafeGet(value.id).value = CacheEntry(Result.Success(value))
+			for ((id, value) in values) {
+				unsafeGet(id).value = CacheEntry(Result.Success(id, value))
 			}
 		}
 	}
@@ -103,7 +102,7 @@ class MemoryCache<I : Id, O : Identifiable<I>> constructor(
 	}
 }
 
-private data class CacheEntry<Id : clovis.core.Id, O : Identifiable<Id>>(
-	val obj: Result<Id, O>?,
+private data class CacheEntry<I : Id<O>, O>(
+	val obj: Result<I, O>?,
 	val timestamp: Instant = Clock.System.now(),
 )

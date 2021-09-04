@@ -5,28 +5,29 @@ import clovis.core.cache.CacheResult
 /**
  * Represents a result from an API, with common cases as subtypes.
  */
-sealed class Result<I : Id, out O : Identifiable<I>> {
+sealed class Result<I : Id<O>, O> {
 
 	/**
 	 * The ID of the object that was requested.
 	 *
-	 * @see Identifiable.id
+	 * @see I
 	 */
 	abstract val id: I
 
 	/**
 	 * The [requested object][value] was successfully found.
 	 */
-	data class Success<I : Id, O : Identifiable<I>>(val value: O) : Result<I, O>() {
-		override val id get() = value.id
-	}
+	data class Success<I : Id<O>, O>(
+		override val id: I,
+		val value: O
+	) : Result<I, O>()
 
 	/**
 	 * The request is currently ongoing. [lastKnownValue] gives the previous value.
 	 *
 	 * This type is used as the default state for [CacheResult], for example.
 	 */
-	data class Loading<I : Id, O : Identifiable<I>>(
+	data class Loading<I : Id<O>, O>(
 		override val id: I,
 		val lastKnownValue: Result<I, O>?,
 	) : Result<I, O>()
@@ -34,18 +35,18 @@ sealed class Result<I : Id, out O : Identifiable<I>> {
 	/**
 	 * The request couldn't complete, because the provided [id] doesn't match with any existing object.
 	 */
-	data class NotFound<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
+	data class NotFound<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>()
 
 	/**
 	 * The request couldn't complete, because the provided credentials are insufficient to warrant a reply.
 	 * The requested object may or may not exist.
 	 */
-	data class Unauthorized<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
+	data class Unauthorized<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>()
 
 	/**
 	 * The request couldn't complete, because the server is currently unavailable (no internet connection, server down…).
 	 */
-	data class Unavailable<I : Id>(override val id: I, val message: String?) : Result<I, Nothing>()
+	data class Unavailable<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>()
 }
 
 //region Extensions

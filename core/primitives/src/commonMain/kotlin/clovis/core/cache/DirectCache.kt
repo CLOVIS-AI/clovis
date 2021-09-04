@@ -1,7 +1,6 @@
 package clovis.core.cache
 
 import clovis.core.Id
-import clovis.core.Identifiable
 import clovis.core.Provider
 import clovis.core.Result
 import kotlinx.coroutines.flow.flow
@@ -11,7 +10,7 @@ import kotlinx.coroutines.flow.flow
  *
  * This implementation can be used as a bridge between more useful cache implementations and a [Provider].
  */
-class DirectCache<I : Id, O : Identifiable<I>>(
+class DirectCache<I : Id<O>, O>(
 	private val provider: Provider<I, O>,
 ) : Cache<I, O> {
 
@@ -23,7 +22,7 @@ class DirectCache<I : Id, O : Identifiable<I>>(
 		emit(provider.request(id))
 	}
 
-	override suspend fun updateAll(values: Collection<O>) = Unit
+	override suspend fun updateAll(values: Collection<Pair<I, O>>) = Unit
 
 	override suspend fun expire(id: I) = Unit
 }

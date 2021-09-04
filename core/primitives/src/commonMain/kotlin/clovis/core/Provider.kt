@@ -7,7 +7,7 @@ import clovis.core.cache.Cache
  *
  * @see CachedProvider
  */
-interface Provider<I : Id, O : Identifiable<I>> {
+interface Provider<I : Id<O>, O> {
 
 	/**
 	 * Request the object identified by [id].
@@ -16,7 +16,7 @@ interface Provider<I : Id, O : Identifiable<I>> {
 
 }
 
-interface CachedProvider<I : Id, O : Identifiable<I>> {
+interface CachedProvider<I : Id<O>, O> {
 
 	val provider: Provider<I, O>
 	val cache: Cache<I, O>
