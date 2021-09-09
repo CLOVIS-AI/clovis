@@ -10,4 +10,6 @@ dependencies {
 
 	implementation("com.datastax.oss:java-driver-mapper-runtime:_")
 	kapt("com.datastax.oss:java-driver-mapper-processor:_")
+
+	testImplementation(project(":core:test"))
 }
