@@ -1,12 +1,12 @@
 package clovis.money.database
 
-import clovis.core.CachedProvider
 import clovis.core.Provider
 import clovis.core.Result
 import clovis.core.cache.Cache
 import clovis.database.Database
 import clovis.database.utils.updateTable
 import clovis.money.Denomination
+import clovis.money.DenominationProvider
 import com.datastax.oss.driver.api.mapper.annotations.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,6 +45,9 @@ internal interface DbDenominationDao {
 	@Select
 	fun get(id: UUID): DbDenomination?
 
+	@Update
+	fun save(denomination: DbDenomination)
+
 }
 
 /**
@@ -72,7 +75,6 @@ class DatabaseDenominationProvider(private val database: Database) :
 			?.let { Result.Success(id, it) }
 			?: Result.NotFound(id, message = null)
 	}
-
 }
 
 /**
@@ -82,7 +84,25 @@ class DatabaseDenominationProvider(private val database: Database) :
  */
 class DatabaseDenominationCachedProvider(
 	override val provider: DatabaseDenominationProvider,
-	override val cache: Cache<DatabaseId<Denomination>, Denomination>
-) : CachedProvider<DatabaseId<Denomination>, Denomination> {
+	override val cache: Cache<DatabaseId<DbDenomination>, DbDenomination>
+) : DenominationProvider<DatabaseId<DbDenomination>, DbDenomination> {
+
+	override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean) =
+		withContext(Dispatchers.IO) {
+			provider.checkTables()
+
+			val id = UUID.randomUUID()
+
+			provider.mapper.save(
+				DbDenomination(
+					id,
+					name,
+					symbol,
+					symbolBeforeValue
+				)
+			)
+
+			DatabaseId<DbDenomination>(id)
+		}
 
 }
