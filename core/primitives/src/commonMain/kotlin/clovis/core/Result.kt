@@ -35,18 +35,27 @@ sealed class Result<I : Id<O>, O> {
 	/**
 	 * The request couldn't complete, because the provided [id] doesn't match with any existing object.
 	 */
-	data class NotFound<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>()
+	data class NotFound<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>() {
+		override fun toString() = "NotFound $id" +
+				(if (message != null) " $message" else "")
+	}
 
 	/**
 	 * The request couldn't complete, because the provided credentials are insufficient to warrant a reply.
 	 * The requested object may or may not exist.
 	 */
-	data class Unauthorized<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>()
+	data class Unauthorized<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>() {
+		override fun toString() = "Unauthorized $id" +
+				(if (message != null) " $message" else "")
+	}
 
 	/**
 	 * The request couldn't complete, because the server is currently unavailable (no internet connection, server down…).
 	 */
-	data class Unavailable<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>()
+	data class Unavailable<I : Id<O>, O>(override val id: I, val message: String?) : Result<I, O>() {
+		override fun toString() = "Unavailable $id" +
+				(if (message != null) " $message" else "")
+	}
 }
 
 //region Extensions
