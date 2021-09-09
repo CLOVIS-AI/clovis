@@ -5,20 +5,39 @@ import clovis.core.Provider
 import clovis.core.Result
 import clovis.core.cache.Cache
 import clovis.database.Database
+import clovis.database.utils.updateTable
 import clovis.money.Denomination
 import com.datastax.oss.driver.api.mapper.annotations.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.intellij.lang.annotations.Language
 import java.util.*
 
+private const val dbDenominationName = "denominations"
+
 @Entity
-@CqlName("denominations")
-internal data class DbDenomination(
+@CqlName(dbDenominationName)
+data class DbDenomination(
 	@PartitionKey val id: UUID?,
 	override val name: String,
 	override val symbol: String,
 	override val symbolBeforeValue: Boolean
-) : Denomination
+) : Denomination {
+	companion object {
+		@Language("CassandraQL")
+		internal val migrations = mapOf(
+			0 to """
+				create table $dbDenominationName (
+				id					UUID,
+				name				TEXT,
+				symbol				TEXT,
+				symbol_before_value	BOOLEAN,
+				PRIMARY KEY ( id ),
+			)
+			""".trimIndent(),
+		)
+	}
+}
 
 @Dao
 internal interface DbDenominationDao {
@@ -33,13 +52,22 @@ internal interface DbDenominationDao {
  *
  * @see DatabaseDenominationCachedProvider
  */
-class DatabaseDenominationProvider(database: Database) : Provider<DatabaseId<Denomination>, Denomination> {
+class DatabaseDenominationProvider(private val database: Database) :
+	Provider<DatabaseId<DbDenomination>, DbDenomination> {
 
-	private val mapper = DbMoneyMapperBuilder(database.session)
-		.build()
-		.denominations()
+	internal val mapper by lazy {
+		DbMoneyMapperBuilder(database.session)
+			.build()
+			.denominations()
+	}
 
-	override suspend fun request(id: DatabaseId<Denomination>) = withContext(Dispatchers.IO) {
+	internal suspend fun checkTables() {
+		database.updateTable(dbDenominationName, DbDenomination.migrations)
+	}
+
+	override suspend fun request(id: DatabaseId<DbDenomination>) = withContext(Dispatchers.IO) {
+		checkTables()
+
 		mapper.get(id.uuid)
 			?.let { Result.Success(id, it) }
 			?: Result.NotFound(id, message = null)
