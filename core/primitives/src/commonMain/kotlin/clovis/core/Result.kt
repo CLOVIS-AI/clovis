@@ -72,4 +72,10 @@ val Result<*, *>.success: Boolean?
 		else -> false
 	}
 
+val Result<*, *>.done: Boolean
+	get() = when (this) {
+		is Result.Loading -> false
+		else -> true
+	}
+
 //endregion
