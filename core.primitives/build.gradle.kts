@@ -21,8 +21,8 @@ kotlin {
 	sourceSets {
 		val commonMain by getting {
 			dependencies {
-				api("org.jetbrains.kotlinx:kotlinx-coroutines-core:_")
-				api("org.jetbrains.kotlinx:kotlinx-serialization-core:_")
+				api(KotlinX.coroutines.core)
+				api(KotlinX.serialization.core)
 				implementation("org.jetbrains.kotlinx:kotlinx-datetime:_")
 			}
 		}
