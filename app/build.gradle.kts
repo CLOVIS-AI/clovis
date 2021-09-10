@@ -45,3 +45,9 @@ kotlin {
 		}
 	}
 }
+
+compose.desktop {
+	application {
+		mainClass = "clovis.app.AppKt"
+	}
+}
