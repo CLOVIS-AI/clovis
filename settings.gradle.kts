@@ -13,4 +13,6 @@ include(
 
 	"money",
 	"money.database",
+
+	"app",
 )
