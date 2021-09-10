@@ -44,6 +44,12 @@ class Database(
 	companion object {
 		private val log = logger(this)
 
+		/**
+		 * Connects to the database.
+		 *
+		 * To override the default connection values, create a `application.conf` file in the project's resources;
+		 * see [the driver documentation](https://docs.datastax.com/en/developer/java-driver/4.13/manual/core/configuration/reference/).
+		 */
 		suspend fun connect(): Database {
 			val session = CqlSession.builder()
 				.buildAsync()
@@ -59,7 +65,5 @@ class Database(
 			return Database(session)
 		}
 
-		// In the future, when 'connect' gets fancy arguments, connectTest will keep the defaults used by tests
-		suspend fun connectLocal() = connect()
 	}
 }

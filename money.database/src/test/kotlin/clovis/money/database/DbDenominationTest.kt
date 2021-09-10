@@ -11,7 +11,7 @@ class DbDenominationTest {
 
 	@Test
 	fun createAndGet() = runTest {
-		val database = Database.connectLocal()
+		val database = Database.connect()
 
 		val provider = DatabaseDenominationProvider(database)
 		val denominations = DatabaseDenominationCachedProvider(provider, provider.cached())
