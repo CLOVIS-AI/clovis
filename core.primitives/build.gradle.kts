@@ -21,8 +21,8 @@ kotlin {
 	sourceSets {
 		val commonMain by getting {
 			dependencies {
-				api("org.jetbrains.kotlinx:kotlinx-coroutines-core:_")
-				api("org.jetbrains.kotlinx:kotlinx-serialization-core:_")
+				api(KotlinX.coroutines.core)
+				api(KotlinX.serialization.core)
 				implementation("org.jetbrains.kotlinx:kotlinx-datetime:_")
 			}
 		}
@@ -32,7 +32,7 @@ kotlin {
 				implementation(kotlin("test-common"))
 				implementation(kotlin("test-annotations-common"))
 
-				implementation(project(":core:test"))
+				implementation(project(":core.test"))
 			}
 		}
 
