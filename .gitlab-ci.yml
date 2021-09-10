@@ -16,7 +16,7 @@ variables:
   services:
     - $CASSANDRA_IMAGE
   script: &prepare_database
-    - cp core/database/src/main/resources/application.gitlab.conf core/database/src/main/resources/application.conf
+    - cp core.database/src/main/resources/application.gitlab.conf core.database/src/main/resources/application.conf
 
 core-jvm-test:
   image: $OPENJDK_IMAGE

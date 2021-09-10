@@ -32,7 +32,7 @@ kotlin {
 				implementation(kotlin("test-common"))
 				implementation(kotlin("test-annotations-common"))
 
-				implementation(project(":core:test"))
+				implementation(project(":core.test"))
 			}
 		}
 

@@ -6,10 +6,11 @@ plugins {
 
 include(
 	"core",
-	"core:primitives",
-	"core:test",
-	"core:database",
+	"core.primitives",
+	"core.test",
+	"core.database",
 	"core.logger",
+
 	"money",
 	"money.database",
 )
