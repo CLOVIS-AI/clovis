@@ -24,6 +24,7 @@ kotlin {
 				api(project(":core"))
 
 				api(compose.runtime)
+				api(compose.web.widgets)
 			}
 		}
 
@@ -48,6 +49,6 @@ kotlin {
 
 compose.desktop {
 	application {
-		mainClass = "clovis.app.AppKt"
+		mainClass = "clovis.app.AppJvmKt"
 	}
 }
