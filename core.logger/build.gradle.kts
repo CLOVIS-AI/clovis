@@ -2,7 +2,6 @@
 
 plugins {
 	kotlin("multiplatform")
-	kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -12,9 +11,10 @@ kotlin {
 	}
 
 	sourceSets {
-		val commonMain by getting {
+		val jvmMain by getting {
 			dependencies {
-				api(project(":core:primitives"))
+				implementation("org.slf4j:slf4j-api:_")
+				implementation("org.slf4j:slf4j-simple:_")
 			}
 		}
 	}

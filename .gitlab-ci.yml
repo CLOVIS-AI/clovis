@@ -2,6 +2,7 @@ variables:
   TEST_DB_IMAGE: "$CI_REGISTRY_IMAGE/mariadb-client:$CI_PIPELINE_IID"
   RELEASE_DB_IMAGE: "$CI_REGISTRY_IMAGE/mariadb-client:latest"
   OPENJDK_IMAGE: "openjdk:11"
+  CASSANDRA_IMAGE: "cassandra:4.0"
 
 .gradle:
   script: &prepare_gradle
@@ -10,6 +11,12 @@ variables:
     paths:
       - .gradle/wrapper
       - .gradle/caches
+
+.database:
+  services:
+    - $CASSANDRA_IMAGE
+  script: &prepare_database
+    - cp core/database/src/main/resources/application.gitlab.conf core/database/src/main/resources/application.conf
 
 core-jvm-test:
   image: $OPENJDK_IMAGE
@@ -25,6 +32,22 @@ core-jvm-test:
     when: always
     paths:
       - core/build/reports/tests/
+
+money-database-test:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle, .database ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - ./gradlew money.database:test
+  artifacts:
+    reports:
+      junit: money.database/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - money.database/build/reports/tests/
 
 telegram:
   stage: deploy

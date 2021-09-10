@@ -1,5 +1,8 @@
 package clovis.money
 
+import clovis.core.CachedProvider
+import clovis.core.Id
+
 /**
  * The way a monetary sum should be displayed the user.
  *
@@ -21,5 +24,19 @@ interface Denomination {
 	 *
 	 * @see Money.toString
 	 */
-	fun toString(sum: Long, includeSymbol: Boolean = true): String
+	fun toString(sum: Long, includeSymbol: Boolean = true): String = when {
+		includeSymbol && symbolBeforeValue -> "$symbol$sum"
+		includeSymbol && !symbolBeforeValue -> "$sum$symbol"
+		else -> "$sum"
+	}
+}
+
+interface DenominationProvider<I : Id<D>, D : Denomination> : CachedProvider<I, D> {
+
+	/**
+	 * Creates a new [Denomination] and stores it.
+	 * @return The ID of the created denomination.
+	 */
+	suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): I
+
 }
