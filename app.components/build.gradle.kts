@@ -18,7 +18,6 @@ kotlin {
 				api(project(":core"))
 
 				api(compose.runtime)
-				api(compose.web.widgets)
 			}
 		}
 
