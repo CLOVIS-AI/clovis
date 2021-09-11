@@ -22,4 +22,5 @@ include(
 	"money.database",
 
 	"app",
+	"app.components",
 )
