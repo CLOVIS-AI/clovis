@@ -5,12 +5,6 @@ plugins {
 	id("org.jetbrains.compose")
 }
 
-repositories {
-	mavenCentral()
-	maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-	google()
-}
-
 kotlin {
 	jvm()
 	js {
@@ -22,26 +16,7 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				api(project(":core"))
-
-				api(compose.runtime)
-				api(compose.web.widgets)
-			}
-		}
-
-		val jvmMain by getting {
-			dependencies {
-				api(compose.desktop.currentOs)
-
-				api(compose.foundation)
-				api(compose.material)
-
-				implementation(compose.preview)
-			}
-		}
-
-		val jsMain by getting {
-			dependencies {
-				api(compose.web.core)
+				api(project(":app.components"))
 			}
 		}
 	}
