@@ -23,4 +23,8 @@ include(
 
 	"app",
 	"app.components",
+
+	"backend",
+	"backend.server",
+	"backend.client",
 )

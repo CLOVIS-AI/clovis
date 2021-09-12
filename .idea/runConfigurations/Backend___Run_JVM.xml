@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="App » Run JVM" type="GradleRunConfiguration" factoryName="Gradle">
-    <output_file path="$PROJECT_DIR$/app/build/desktop.logs" is_save="true" />
-    <log_file alias="logs" path="$PROJECT_DIR$/app/build/desktop.logs" />
+  <configuration default="false" name="Backend » Run JVM" type="GradleRunConfiguration" factoryName="Gradle">
+    <output_file path="$PROJECT_DIR$/backend/build/server.logs" is_save="true" />
+    <log_file alias="logs" path="$PROJECT_DIR$/backend/build/server.logs" />
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/app" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$/backend" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">

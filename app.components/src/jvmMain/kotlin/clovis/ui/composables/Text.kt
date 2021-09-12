@@ -1,3 +1,5 @@
+@file:JvmName("TextJvm")
+
 package clovis.ui.composables
 
 import androidx.compose.runtime.Composable
