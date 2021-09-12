@@ -26,4 +26,5 @@ include(
 
 	"backend",
 	"backend.server",
+	"backend.client",
 )
