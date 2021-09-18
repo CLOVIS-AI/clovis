@@ -18,7 +18,7 @@ variables:
   script: &prepare_database
     - cp core.database/src/main/resources/application.gitlab.conf core.database/src/main/resources/application.conf
 
-core-jvm-test:
+core test-jvm:
   image: $OPENJDK_IMAGE
   extends: [ .gradle ]
   needs: [ ]
@@ -33,7 +33,7 @@ core-jvm-test:
     paths:
       - core/build/reports/tests/
 
-core-database-test:
+core.database test:
   image: $OPENJDK_IMAGE
   extends: [ .gradle, .database ]
   needs: [ ]
@@ -49,7 +49,7 @@ core-database-test:
     paths:
       - core.database/build/reports/tests/
 
-money-database-test:
+money.database test:
   image: $OPENJDK_IMAGE
   extends: [ .gradle, .database ]
   needs: [ ]
