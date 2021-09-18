@@ -15,3 +15,7 @@ internal fun String.asStringLiteral(): String {
 	val escaped = replace("'", "&apos")
 	return "'$escaped'"
 }
+
+internal fun String.fromStringLiteral(): String = this
+	.removeSurrounding("'")
+	.replace("&apos", "'")

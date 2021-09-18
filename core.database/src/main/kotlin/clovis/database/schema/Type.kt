@@ -1,5 +1,7 @@
 package clovis.database.schema
 
+import clovis.database.utils.asStringLiteral
+import clovis.database.utils.fromStringLiteral
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -35,14 +37,14 @@ sealed interface Type<T : Any?> {
 
 		object Text : StatelessType<String>() {
 			override val type = "text"
-			override fun encode(value: String) = value
-			override fun decode(value: String) = value
+			override fun encode(value: String) = value.asStringLiteral()
+			override fun decode(value: String) = value.fromStringLiteral()
 		}
 
 		object TextASCII : StatelessType<String>() {
 			override val type = "ascii"
-			override fun encode(value: String) = value
-			override fun decode(value: String) = value
+			override fun encode(value: String) = value.asStringLiteral()
+			override fun decode(value: String) = value.fromStringLiteral()
 		}
 
 		object Binary : StatelessType<ByteArray>() {
