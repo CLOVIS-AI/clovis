@@ -157,6 +157,28 @@ sealed interface Type<T : Any?> {
 		}
 	}
 
+	object Collections {
+
+		/**
+		 * An implementation of a nullable type.
+		 *
+		 * @see orNull
+		 */
+		class Nullable<T : Any>(val contents: Type<T>) : Type<T?> {
+			override val type: String
+				get() = contents.type // In Cassandra, all types are nullable anyway
+
+			override fun encode(value: T?) =
+				if (value != null) contents.encode(value)
+				else "null"
+
+			override fun decode(value: String): T? =
+				if (value == "null") null
+				else contents.decode(value)
+		}
+
+	}
+
 	companion object {
 		fun fromCqlName(string: String): Type<*> {
 			val simpleTypes = sequenceOf(
@@ -172,5 +194,7 @@ sealed interface Type<T : Any?> {
 				return simpleResult
 			else error("Type '$string' could not be interpreted.")
 		}
+
+		fun <T : Any> Type<T>.orNull() = Collections.Nullable(this)
 	}
 }
