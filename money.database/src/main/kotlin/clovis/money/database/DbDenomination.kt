@@ -4,51 +4,31 @@ import clovis.core.Provider
 import clovis.core.Result
 import clovis.core.cache.Cache
 import clovis.database.Database
-import clovis.database.utils.updateTable
+import clovis.database.queries.SelectExpression.Companion.eq
+import clovis.database.queries.UpdateExpression.Companion.set
+import clovis.database.queries.insert
+import clovis.database.queries.select
+import clovis.database.schema.*
+import clovis.database.utils.get
 import clovis.money.Denomination
 import clovis.money.DenominationProvider
-import com.datastax.oss.driver.api.mapper.annotations.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
-import org.intellij.lang.annotations.Language
 import java.util.*
 
-private const val dbDenominationName = "denominations"
+private object Columns {
+	val id = column("id", Type.Binary.UUID)
+	val name = column("name", Type.Binary.Text)
+	val symbol = column("symb", Type.Binary.Text)
+	val symbolBeforeValue = column("sbfv", Type.Binary.Boolean)
+}
 
-@Entity
-@CqlName(dbDenominationName)
-data class DbDenomination(
-	@PartitionKey val id: UUID?,
+class DbDenomination(
 	override val name: String,
 	override val symbol: String,
 	override val symbolBeforeValue: Boolean
-) : Denomination {
-	companion object {
-		@Language("CassandraQL")
-		internal val migrations = mapOf(
-			0 to """
-				create table $dbDenominationName (
-				id					UUID,
-				name				TEXT,
-				symbol				TEXT,
-				symbol_before_value	BOOLEAN,
-				PRIMARY KEY ( id ),
-			)
-			""".trimIndent(),
-		)
-	}
-}
-
-@Dao
-internal interface DbDenominationDao {
-
-	@Select
-	fun get(id: UUID): DbDenomination?
-
-	@Update
-	fun save(denomination: DbDenomination)
-
-}
+) : Denomination
 
 /**
  * Database access for [Denomination].
@@ -58,21 +38,30 @@ internal interface DbDenominationDao {
 class DatabaseDenominationProvider(private val database: Database) :
 	Provider<DatabaseId<DbDenomination>, DbDenomination> {
 
-	internal val mapper by lazy {
-		DbMoneyMapperBuilder(database.session)
-			.build()
-			.denominations()
-	}
+	internal lateinit var denominations: Table
 
 	internal suspend fun checkTables() {
-		database.updateTable(dbDenominationName, DbDenomination.migrations)
+		if (!::denominations.isInitialized)
+			denominations = database.table(
+				MoneyKeyspace, "denominations",
+				Columns.id.partitionKey(),
+				Columns.name,
+				Columns.symbol,
+				Columns.symbolBeforeValue,
+			)
 	}
 
 	override suspend fun request(id: DatabaseId<DbDenomination>) = withContext(Dispatchers.IO) {
 		checkTables()
 
-		mapper.get(id.uuid)
-			?.let { Result.Success(id, it) }
+		denominations.select(Columns.id eq id.uuid)
+			.firstOrNull()
+			?.let {
+				Result.Success(
+					id,
+					DbDenomination(it[Columns.name], it[Columns.symbol], it[Columns.symbolBeforeValue])
+				)
+			}
 			?: Result.NotFound(id, message = null)
 	}
 }
@@ -93,13 +82,11 @@ class DatabaseDenominationCachedProvider(
 
 			val id = UUID.randomUUID()
 
-			provider.mapper.save(
-				DbDenomination(
-					id,
-					name,
-					symbol,
-					symbolBeforeValue
-				)
+			provider.denominations.insert(
+				Columns.id set id,
+				Columns.name set name,
+				Columns.symbol set symbol,
+				Columns.symbolBeforeValue set symbolBeforeValue,
 			)
 
 			DatabaseId<DbDenomination>(id)
