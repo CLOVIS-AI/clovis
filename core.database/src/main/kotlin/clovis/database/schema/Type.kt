@@ -25,27 +25,33 @@ sealed interface Type<T : Any?> {
 	 */
 	val type: String
 
+	fun defaultToString() = this::class.qualifiedName?.removePrefix("clovis.database.schema.Type.") ?: type
+
+	sealed class StatelessType<T : Any?> : Type<T> {
+		override fun toString() = defaultToString()
+	}
+
 	object Binary {
 
-		object Text : Type<String> {
+		object Text : StatelessType<String>() {
 			override val type = "text"
 			override fun encode(value: String) = value
 			override fun decode(value: String) = value
 		}
 
-		object TextASCII : Type<String> {
-			override val type = "text"
+		object TextASCII : StatelessType<String>() {
+			override val type = "ascii"
 			override fun encode(value: String) = value
 			override fun decode(value: String) = value
 		}
 
-		object Binary : Type<ByteArray> {
+		object Binary : StatelessType<ByteArray>() {
 			override val type = "blob"
 			override fun encode(value: ByteArray) = value.decodeToString()
 			override fun decode(value: String) = value.encodeToByteArray()
 		}
 
-		object Boolean : Type<kotlin.Boolean> {
+		object Boolean : StatelessType<kotlin.Boolean>() {
 			override val type = "boolean"
 			override fun encode(value: kotlin.Boolean) = value.toString()
 			override fun decode(value: String) = value.toBooleanStrict()
@@ -53,9 +59,10 @@ sealed interface Type<T : Any?> {
 
 		object Inet : Type<String> by Text {
 			override val type = "inet"
+			override fun toString() = defaultToString()
 		}
 
-		object UUID : Type<java.util.UUID> {
+		object UUID : StatelessType<java.util.UUID>() {
 			override val type = "uuid"
 			override fun encode(value: java.util.UUID) = value.toString()
 			override fun decode(value: String): java.util.UUID = java.util.UUID.fromString(value)
@@ -65,25 +72,25 @@ sealed interface Type<T : Any?> {
 	object Number {
 		//region Integers
 
-		object Byte : Type<kotlin.Byte> {
+		object Byte : StatelessType<kotlin.Byte>() {
 			override val type = "tinyint"
 			override fun encode(value: kotlin.Byte) = value.toString()
 			override fun decode(value: String) = value.toByte()
 		}
 
-		object Short : Type<kotlin.Short> {
+		object Short : StatelessType<kotlin.Short>() {
 			override val type = "smallint"
 			override fun encode(value: kotlin.Short) = value.toString()
 			override fun decode(value: String) = value.toShort()
 		}
 
-		object Int : Type<kotlin.Int> {
+		object Int : StatelessType<kotlin.Int>() {
 			override val type = "int"
 			override fun encode(value: kotlin.Int) = value.toString()
 			override fun decode(value: String) = value.toInt()
 		}
 
-		object Long : Type<kotlin.Long> {
+		object Long : StatelessType<kotlin.Long>() {
 			override val type = "bigint"
 			override fun encode(value: kotlin.Long) = value.toString()
 			override fun decode(value: String) = value.toLong()
@@ -91,9 +98,10 @@ sealed interface Type<T : Any?> {
 
 		object Counter : Type<kotlin.Long> by Long {
 			override val type = "counter"
+			override fun toString() = defaultToString()
 		}
 
-		object BigInteger : Type<java.math.BigInteger> {
+		object BigInteger : StatelessType<java.math.BigInteger>() {
 			override val type = "varint"
 			override fun encode(value: java.math.BigInteger) = value.toString()
 			override fun decode(value: String): java.math.BigInteger = BigInteger(value)
@@ -102,19 +110,19 @@ sealed interface Type<T : Any?> {
 		//endregion
 		//region Floating-point
 
-		object Float : Type<kotlin.Float> {
+		object Float : StatelessType<kotlin.Float>() {
 			override val type = "float"
 			override fun encode(value: kotlin.Float) = value.toString()
 			override fun decode(value: String) = value.toFloat()
 		}
 
-		object Double : Type<kotlin.Double> {
+		object Double : StatelessType<kotlin.Double>() {
 			override val type = "double"
 			override fun encode(value: kotlin.Double) = value.toString()
 			override fun decode(value: String) = value.toDouble()
 		}
 
-		object BigDecimal : Type<java.math.BigDecimal> {
+		object BigDecimal : StatelessType<java.math.BigDecimal>() {
 			override val type = "decimal"
 			override fun encode(value: java.math.BigDecimal) = value.toString()
 			override fun decode(value: String) = BigDecimal(value)
@@ -124,25 +132,25 @@ sealed interface Type<T : Any?> {
 	}
 
 	object Dates {
-		object Timestamp : Type<Instant> {
+		object Timestamp : StatelessType<Instant>() {
 			override val type = "timestamp"
 			override fun encode(value: Instant) = value.toString()
 			override fun decode(value: String): Instant = Instant.parse(value)
 		}
 
-		object Date : Type<Instant> {
+		object Date : StatelessType<Instant>() {
 			override val type = "date"
 			override fun encode(value: Instant) = value.epochSecond.toString()
 			override fun decode(value: String): Instant = Instant.ofEpochSecond(value.toLong())
 		}
 
-		object Time : Type<LocalTime> {
+		object Time : StatelessType<LocalTime>() {
 			override val type = "time"
 			override fun encode(value: LocalTime) = value.toString()
 			override fun decode(value: String): LocalTime = LocalTime.parse(value)
 		}
 
-		object Duration : Type<java.time.Duration> {
+		object Duration : StatelessType<java.time.Duration>() {
 			override val type = "duration"
 			override fun encode(value: java.time.Duration) = value.toString()
 			override fun decode(value: String): java.time.Duration = java.time.Duration.parse(value)
