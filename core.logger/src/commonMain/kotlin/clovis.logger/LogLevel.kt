@@ -15,6 +15,6 @@ enum class LogLevel {
 	val error = ordinal <= 3
 
 	companion object {
-		val Default = INFO
+		val Default = TRACE
 	}
 }

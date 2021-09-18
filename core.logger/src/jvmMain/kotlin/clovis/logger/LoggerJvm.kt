@@ -8,7 +8,7 @@ private class LoggerJvm(obj: Any) : Logger {
 
 	override var level = LogLevel.Default
 
-	override fun forceTrace(message: String) = log.trace(message)
+	override fun forceTrace(message: String) = log.debug(message)
 
 	override fun forceInfo(message: String) = log.info(message)
 
