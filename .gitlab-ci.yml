@@ -33,6 +33,22 @@ core-jvm-test:
     paths:
       - core/build/reports/tests/
 
+core-database-test:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle, .database ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - ./gradlew core.database:test
+  artifacts:
+    reports:
+      junit: core.database/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - core.database/build/reports/tests/
+
 money-database-test:
   image: $OPENJDK_IMAGE
   extends: [ .gradle, .database ]
