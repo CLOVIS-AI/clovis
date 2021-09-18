@@ -4,6 +4,7 @@ import clovis.database.Database
 import clovis.database.utils.asStringLiteral
 
 data class Table(
+	val database: Database,
 	val name: String,
 	val keyspace: String,
 	val columns: List<Column<*>>,
@@ -31,6 +32,7 @@ suspend fun Database.table(
 		keyspace = keyspace,
 		columns = columns.toList(),
 		options = optionsDsl.values,
+		database = this,
 	).also { migrateTable(it) }
 }
 

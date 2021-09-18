@@ -45,11 +45,11 @@ class Database(
 	}
 
 	suspend fun execute(query: String): AsyncResultSet = session
-		.executeAsync(query.also { log.trace { "executing: $it" } })
+		.executeAsync(query.also { log.trace { "executing: \n\t$it" } })
 		.await()
 
 	suspend fun execute(statement: Statement<*>): AsyncResultSet = session
-		.executeAsync(statement.also { log.trace { "executing: $it" } })
+		.executeAsync(statement.also { log.trace { "executing: \n\t$it" } })
 		.await()
 
 	companion object {

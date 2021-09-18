@@ -70,7 +70,7 @@ internal suspend fun Database.migrateTable(table: Table) {
 	check(actualName == table.name) { "Expected name ${table.name}, but found $actualName" }
 
 	log.trace { "Parsing table declaration…" }
-	val current = parseTableDeclaration(tableDescription.get("create_statement", Type.Binary.Text))
+	val current = parseTableDeclaration(tableDescription.get("create_statement", Type.Binary.Text), this)
 
 	applyDiff(current, table)
 }
@@ -113,7 +113,7 @@ private suspend fun Database.applyDiff(current: Table, target: Table) {
 	}
 }
 
-private fun parseTableDeclaration(declaration: String): Table {
+private fun parseTableDeclaration(declaration: String, database: Database): Table {
 	log.trace { "Declaration to parse: $declaration" }
 
 	val scanner = Scanner(declaration)
@@ -169,6 +169,7 @@ private fun parseTableDeclaration(declaration: String): Table {
 		keyspace = keyspace,
 		columns = columns,
 		options = options,
+		database = database,
 	)
 }
 
