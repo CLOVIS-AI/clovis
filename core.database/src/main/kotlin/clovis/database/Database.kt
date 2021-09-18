@@ -4,7 +4,10 @@ import clovis.database.Database.Companion.connect
 import clovis.database.utils.await
 import clovis.logger.info
 import clovis.logger.logger
+import clovis.logger.trace
 import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet
+import com.datastax.oss.driver.api.core.cql.Statement
 import org.intellij.lang.annotations.Language
 
 @Language("CassandraQL")
@@ -25,7 +28,7 @@ private const val CONNECT_TO_KEYSPACE = """
  * The [disconnect] function should be called, to free resources.
  */
 class Database(
-	val session: CqlSession,
+	private val session: CqlSession,
 ) {
 	init {
 		log.info { "Connected." }
@@ -40,6 +43,14 @@ class Database(
 	suspend fun disconnect() {
 		session.closeAsync().await()
 	}
+
+	suspend fun execute(query: String): AsyncResultSet = session
+		.executeAsync(query.also { log.trace { "executing: \n\t$it" } })
+		.await()
+
+	suspend fun execute(statement: Statement<*>): AsyncResultSet = session
+		.executeAsync(statement.also { log.trace { "executing: \n\t$it" } })
+		.await()
 
 	companion object {
 		private val log = logger(this)
