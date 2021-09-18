@@ -156,4 +156,21 @@ sealed interface Type<T : Any?> {
 			override fun decode(value: String): java.time.Duration = java.time.Duration.parse(value)
 		}
 	}
+
+	companion object {
+		fun fromCqlName(string: String): Type<*> {
+			val simpleTypes = sequenceOf(
+				Binary.Text, Binary.TextASCII, Binary.Binary, Binary.Boolean, Binary.Inet, Binary.UUID,
+				Number.Byte, Number.Short, Number.Int, Number.Long, Number.BigInteger,
+				Number.Float, Number.Double, Number.BigDecimal,
+				Number.Counter,
+				Dates.Timestamp, Dates.Date, Dates.Time, Dates.Duration,
+			)
+
+			val simpleResult = simpleTypes.find { it.type == string }
+			if (simpleResult != null)
+				return simpleResult
+			else error("Type '$string' could not be interpreted.")
+		}
+	}
 }
