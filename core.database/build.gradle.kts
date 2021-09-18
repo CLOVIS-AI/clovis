@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
 	implementation(project(":core.logger"))
+	testImplementation(project(":core.test"))
 
 	// Kotlin Coroutines
 	api(KotlinX.coroutines.core)
