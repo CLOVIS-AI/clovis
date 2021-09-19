@@ -33,6 +33,21 @@ core test-jvm:
     paths:
       - core/build/reports/tests/
 
+core.primitives test-jvm:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+  script:
+    - ./gradlew core.primitives:jvmTest
+  artifacts:
+    reports:
+      junit: core.primitives/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - core.primitives/build/reports/tests/
+
 core.database test:
   image: $OPENJDK_IMAGE
   extends: [ .gradle, .database ]
