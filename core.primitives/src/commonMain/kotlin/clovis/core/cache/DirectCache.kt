@@ -1,28 +1,31 @@
 package clovis.core.cache
 
-import clovis.core.Id
-import clovis.core.Provider
-import clovis.core.Result
+import clovis.core.Progress
+import clovis.core.Ref
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
 /**
  * A no-op implementation of the [Cache] interface.
  *
- * This implementation can be used as a bridge between more useful cache implementations and a [Provider].
+ * Note that unlike all other [Cache] implementations, [get] is a short-lived flow.
  */
-class DirectCache<I : Id<O>, O>(
-	private val provider: Provider<I, O>,
-) : Cache<I, O> {
+class DirectCache<R : Ref<R, O>, O> : Cache<R, O> {
 
-	override fun get(id: I): CacheResult<I, O> = flow {
+	/**
+	 * A short-lived flow of the results of querying the [ref].
+	 *
+	 * See [Cache.get].
+	 */
+	override fun get(ref: R): CacheResult<R, O> = flow {
 		// Emit a 'loading' value instantly
-		emit(Result.Loading(id, lastKnownValue = null))
+		emit(Progress.Loading(ref, lastKnownValue = null))
 
 		// Emit the value from the requested when it is available
-		emit(provider.request(id))
+		emitAll(ref.directRequest())
 	}
 
-	override suspend fun updateAll(values: Collection<Pair<I, O>>) = Unit
+	override suspend fun updateAll(values: Iterable<Pair<R, O>>) = Unit
 
-	override suspend fun expire(id: I) = Unit
+	override suspend fun expire(ref: R) = Unit
 }
