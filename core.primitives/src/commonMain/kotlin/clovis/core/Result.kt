@@ -82,14 +82,14 @@ fun <R, O> Flow<Progress<R, O>>.skipLoading() where R : Ref<R, O> =
 /**
  * Awaits the first [Progress.Result] value.
  */
-suspend fun <R, O> Flow<Progress<R, O>>.awaitResult() where R : Ref<R, O> =
+suspend fun <R, O> Flow<Progress<R, O>>.firstResult() where R : Ref<R, O> =
 	skipLoading().first()
 
 /**
  * Awaits the first [Progress.Result] value, returns it if it is successful, throws if it isn't.
  */
-suspend fun <R, O> Flow<Progress<R, O>>.awaitResultOrThrow(): O where R : Ref<R, O> =
-	when (val result = awaitResult()) {
+suspend fun <R, O> Flow<Progress<R, O>>.firstResultOrThrow(): O where R : Ref<R, O> =
+	when (val result = firstResult()) {
 		is Progress.Success -> result.value
 		is Progress.Failure -> result.throwException()
 		else -> error("Impossible case, a result that is neither Success nor Failure")

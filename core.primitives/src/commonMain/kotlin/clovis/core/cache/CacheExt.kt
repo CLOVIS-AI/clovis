@@ -1,7 +1,7 @@
 package clovis.core.cache
 
 import clovis.core.Ref
-import clovis.core.awaitResultOrThrow
+import clovis.core.firstResultOrThrow
 import kotlinx.coroutines.CoroutineScope
 
 //region Cache implementation shortcuts
@@ -13,6 +13,6 @@ fun <R, O> Cache<R, O>.cachedInMemory(scope: CoroutineScope) where R : Ref<R, O>
 //region Cache extensions
 
 suspend fun <R, O> Cache<R, O>.getOrThrow(id: R): O where R : Ref<R, O> =
-	get(id).awaitResultOrThrow()
+	get(id).firstResultOrThrow()
 
 //endregion

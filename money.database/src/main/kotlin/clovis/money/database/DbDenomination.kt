@@ -1,7 +1,8 @@
 package clovis.money.database
 
+import clovis.core.Progress
 import clovis.core.Provider
-import clovis.core.Result
+import clovis.core.Ref
 import clovis.core.cache.Cache
 import clovis.database.Database
 import clovis.database.queries.SelectExpression.Companion.eq
@@ -11,10 +12,10 @@ import clovis.database.queries.select
 import clovis.database.schema.*
 import clovis.database.utils.get
 import clovis.money.Denomination
-import clovis.money.DenominationProvider
-import kotlinx.coroutines.Dispatchers
+import clovis.money.DenominationCreator
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flow
 import java.util.*
 
 private object Columns {
@@ -24,19 +25,33 @@ private object Columns {
 	val symbolBeforeValue = column("sbfv", Type.Binary.Boolean)
 }
 
-class DbDenomination(
-	override val name: String,
-	override val symbol: String,
-	override val symbolBeforeValue: Boolean
-) : Denomination
+data class DbDenominationRef(internal val id: UUID, override val provider: DatabaseDenominationProvider) :
+	Ref<DbDenominationRef, Denomination> {
+	override fun directRequest(): Flow<Progress<DbDenominationRef, Denomination>> = flow {
+		provider.checkTables()
 
-/**
- * Database access for [Denomination].
- *
- * @see DatabaseDenominationCachedProvider
- */
-class DatabaseDenominationProvider(private val database: Database) :
-	Provider<DatabaseId<DbDenomination>, DbDenomination> {
+		val result = provider.denominations.select(Columns.id eq id)
+			.firstOrNull()
+			?.let {
+				Progress.Success(
+					this@DbDenominationRef,
+					Denomination(
+						name = it[Columns.name],
+						symbol = it[Columns.symbol],
+						symbolBeforeValue = it[Columns.symbolBeforeValue],
+					)
+				)
+			}
+			?: Progress.NotFound(this@DbDenominationRef, message = null)
+
+		emit(result)
+	}
+}
+
+class DatabaseDenominationProvider(
+	private val database: Database,
+	override val cache: Cache<DbDenominationRef, Denomination>
+) : Provider<DbDenominationRef, Denomination>, DenominationCreator<DbDenominationRef> {
 
 	internal lateinit var denominations: Table
 
@@ -51,45 +66,19 @@ class DatabaseDenominationProvider(private val database: Database) :
 			)
 	}
 
-	override suspend fun request(id: DatabaseId<DbDenomination>) = withContext(Dispatchers.IO) {
+	override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): DbDenominationRef {
 		checkTables()
 
-		denominations.select(Columns.id eq id.uuid)
-			.firstOrNull()
-			?.let {
-				Result.Success(
-					id,
-					DbDenomination(it[Columns.name], it[Columns.symbol], it[Columns.symbolBeforeValue])
-				)
-			}
-			?: Result.NotFound(id, message = null)
+		val id = UUID.randomUUID()
+
+		denominations.insert(
+			Columns.id set id,
+			Columns.name set name,
+			Columns.symbol set symbol,
+			Columns.symbolBeforeValue set symbolBeforeValue,
+		)
+
+		return DbDenominationRef(id, this)
 	}
-}
-
-/**
- * Database cached access for [Denomination].
- *
- * @see DatabaseDenominationProvider
- */
-class DatabaseDenominationCachedProvider(
-	override val provider: DatabaseDenominationProvider,
-	override val cache: Cache<DatabaseId<DbDenomination>, DbDenomination>
-) : DenominationProvider<DatabaseId<DbDenomination>, DbDenomination> {
-
-	override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean) =
-		withContext(Dispatchers.IO) {
-			provider.checkTables()
-
-			val id = UUID.randomUUID()
-
-			provider.denominations.insert(
-				Columns.id set id,
-				Columns.name set name,
-				Columns.symbol set symbol,
-				Columns.symbolBeforeValue set symbolBeforeValue,
-			)
-
-			DatabaseId<DbDenomination>(id)
-		}
 
 }

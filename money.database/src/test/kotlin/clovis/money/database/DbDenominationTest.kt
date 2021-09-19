@@ -1,8 +1,10 @@
 package clovis.money.database
 
-import clovis.core.cache.cached
-import clovis.core.cache.getOrThrow
+import clovis.core.cache.DirectCache
+import clovis.core.firstResultOrThrow
+import clovis.core.request
 import clovis.database.Database
+import clovis.money.Denomination
 import clovis.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,11 +15,10 @@ class DbDenominationTest {
 	fun createAndGet() = runTest {
 		val database = Database.connect()
 
-		val provider = DatabaseDenominationProvider(database)
-		val denominations = DatabaseDenominationCachedProvider(provider, provider.cached())
+		val denominations = DatabaseDenominationProvider(database, DirectCache())
 
-		val id = denominations.create("Euro", "€", symbolBeforeValue = false)
-		val euro = denominations.cache.getOrThrow(id)
+		val ref = denominations.create("Euro", "€", symbolBeforeValue = false)
+		val euro: Denomination = ref.request().firstResultOrThrow()
 
 		assertEquals("Euro", euro.name)
 		assertEquals("€", euro.symbol)
