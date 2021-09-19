@@ -18,6 +18,10 @@ include(
 	"core.database",
 	"core.logger",
 
+	"users.client",
+	"users.server",
+	"users.database",
+
 	"money",
 	"money.database",
 
