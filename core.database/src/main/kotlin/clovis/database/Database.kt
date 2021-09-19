@@ -2,8 +2,8 @@ package clovis.database
 
 import clovis.database.Database.Companion.connect
 import clovis.database.utils.await
+import clovis.logger.WithLogger
 import clovis.logger.info
-import clovis.logger.logger
 import clovis.logger.trace
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.AsyncResultSet
@@ -52,8 +52,7 @@ class Database(
 		.executeAsync(statement.also { log.trace { "executing: \n\t$it" } })
 		.await()
 
-	companion object {
-		private val log = logger(this)
+	companion object : WithLogger() {
 
 		/**
 		 * Connects to the database.
