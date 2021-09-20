@@ -19,5 +19,6 @@ dependencies {
 
 	// Authentication
 	implementation("at.favre.lib:bcrypt:_")
-
+	implementation(Ktor.features.auth)
+	implementation(Ktor.features.authJwt)
 }
