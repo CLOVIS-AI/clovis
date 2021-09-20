@@ -19,4 +19,5 @@ dependencies {
 
 	// Authentication
 	implementation("at.favre.lib:bcrypt:_")
+
 }
