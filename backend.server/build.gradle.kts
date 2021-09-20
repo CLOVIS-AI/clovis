@@ -16,4 +16,7 @@ dependencies {
 	api(Ktor.server.core)
 	api(Ktor.server.netty)
 	api(Ktor.features.serialization)
+
+	// Authentication
+	implementation("at.favre.lib:bcrypt:_")
 }

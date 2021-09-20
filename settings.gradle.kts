@@ -18,9 +18,10 @@ include(
 	"core.database",
 	"core.logger",
 
-	"users.client",
-	"users.server",
-	"users.database",
+	"contacts",
+	"contacts.client",
+	"contacts.server",
+	"contacts.database",
 
 	"money",
 	"money.database",
