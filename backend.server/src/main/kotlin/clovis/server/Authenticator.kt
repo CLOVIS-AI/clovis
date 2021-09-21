@@ -1,6 +1,7 @@
 package clovis.server
 
 import at.favre.lib.crypto.bcrypt.BCrypt
+import clovis.backend.core.Tokens
 import clovis.database.Database
 import clovis.database.queries.SelectExpression.Companion.eq
 import clovis.database.queries.UpdateExpression.Companion.set
@@ -12,8 +13,14 @@ import clovis.database.utils.suspendLazy
 import clovis.logger.WithLogger
 import clovis.logger.error
 import clovis.logger.info
+import com.auth0.jwt.JWT
+import com.auth0.jwt.JWTCreator
+import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.interfaces.Payload
 import kotlinx.coroutines.flow.firstOrNull
+import java.time.Instant
 import java.util.*
+import kotlin.time.toJavaDuration
 
 private const val AuthKeyspace = "clovis_users"
 
@@ -43,6 +50,8 @@ class Authenticator(
 			Columns.id,
 		)
 	}
+
+	//region Account access
 
 	suspend fun findUserByEmail(email: String): User? = usersByEmail.get().select(
 		Columns.email eq email,
@@ -106,6 +115,90 @@ class Authenticator(
 		return User(user.id)
 	}
 
+	//endregion
+	//region Tokens
+
+	private val secretKey = System.getenv("clovis_jwt_secret")
+		?: error("The environment variable 'clovis_jwt_secret' is missing.")
+	private val algorithm = Algorithm.HMAC256(secretKey)
+	private val verifier = JWT
+		.require(algorithm)
+		.withIssuer(CLOVIS_ISSUER)
+		.build()
+
+	private fun createToken(user: User, config: (JWTCreator.Builder) -> JWTCreator.Builder): String =
+		JWT.create()
+			.withIssuer(CLOVIS_ISSUER)
+			.withClaim("userId", user.id.toString())
+			.let(config)
+			.sign(algorithm)
+
+	/**
+	 * Generate an Access Token for [user].
+	 *
+	 * @see Tokens
+	 */
+	@OptIn(kotlin.time.ExperimentalTime::class)
+	fun createAccessToken(user: User): String = createToken(user) { builder ->
+		builder
+			.withClaim("type", "access")
+			.withExpiresAt(Date.from(Instant.now() + Tokens.accessTokenLifetime.toJavaDuration()))
+	}
+
+	/**
+	 * Generate a Refresh Token for [user].
+	 *
+	 * @see Tokens
+	 */
+	@OptIn(kotlin.time.ExperimentalTime::class)
+	fun createRefreshToken(user: User): String = createToken(user) { builder ->
+		builder
+			.withClaim("type", "refresh")
+			.withExpiresAt(Date.from(Instant.now() + Tokens.refreshTokenLifetime.toJavaDuration()))
+	}
+
+	private fun checkToken(token: Payload): User {
+		check(token.issuer == CLOVIS_ISSUER) { "The token isn't identified by the correct issuer." }
+
+		val now = Date.from(Instant.now())
+		check(token.expiresAt >= now) { "The token has expired." }
+
+		val userId = token.getClaim("userId").asString()
+		requireNotNull(userId) { "The token doesn't have a 'userId' claim." }
+		return User(UUID.fromString(userId))
+	}
+
+	/**
+	 * Checks the validity of a [token].
+	 *
+	 * If [token] is a valid access token, a [User] is returned. Otherwise, the method fails with an exception.
+	 * @see Tokens
+	 */
+	fun checkAccessToken(token: Payload): User {
+		// For performance reasons, the access token should be checked without database access
+
+		check(token.getClaim("type").asString() == "access") { "The token isn't an access token." }
+
+		return checkToken(token)
+	}
+
+	/**
+	 * Checks the validity of a [token].
+	 *
+	 * If [token] is a valid refresh token, a [User] is returned. Otherwise, the method fails with an exception.
+	 * @see Tokens
+	 */
+	fun checkRefreshToken(token: Payload): User {
+		// Checking a refresh token should be rarer, so it is not really an issue if it is slow
+
+		check(token.getClaim("type").asString() == "refresh") { "The token isn't a refresh token." }
+
+		return checkToken(token)
+	}
+
+	//endregion
+	//region Hashing
+
 	private fun hash(clearText: String): String {
 		return BCrypt.withDefaults()
 			.hashToString(12, clearText.toCharArray())
@@ -117,5 +210,9 @@ class Authenticator(
 			hash.toCharArray()
 		).verified
 
-	companion object : WithLogger()
+	//endregion
+
+	companion object : WithLogger() {
+		private const val CLOVIS_ISSUER = "braindot.clovis"
+	}
 }
