@@ -4,6 +4,8 @@ variables:
   OPENJDK_IMAGE: "openjdk:11"
   CASSANDRA_IMAGE: "cassandra:4.0"
 
+  clovis_jwt_secret: "secret"
+
 .gradle:
   script: &prepare_gradle
     - export GRADLE_USER_HOME=$(pwd)/.gradle
@@ -79,6 +81,22 @@ money.database test:
     when: always
     paths:
       - money.database/build/reports/tests/
+
+backend.server test:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle, .database ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - ./gradlew backend.server:test
+  artifacts:
+    reports:
+      junit: backend.server/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - backend.server/build/reports/tests/
 
 dokka:
   image: $OPENJDK_IMAGE
