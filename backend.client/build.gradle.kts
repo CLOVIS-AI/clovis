@@ -15,15 +15,12 @@ kotlin {
 			dependencies {
 				api(project(":core.primitives"))
 				api(project(":core.logger"))
+				api(project(":backend.core"))
 
 				// Ktor
 				api(Ktor.client.core)
 				api(Ktor.client.serialization)
 				api(Ktor.client.json)
-
-				// KotlinX
-				api(KotlinX.serialization.core)
-				api(KotlinX.serialization.json)
 			}
 		}
 
