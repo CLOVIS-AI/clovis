@@ -14,6 +14,7 @@ fun Text(
 	TextImpl(text, modifier)
 }
 
+@Composable
 internal expect fun TextImpl(
 	text: String,
 	modifier: Modifier,
