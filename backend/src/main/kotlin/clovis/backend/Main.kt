@@ -1,6 +1,8 @@
 package clovis.backend
 
 import clovis.backend.core.JsonSerializer
+import clovis.database.Database
+import clovis.logger.info
 import clovis.logger.logger
 import clovis.logger.trace
 import io.ktor.application.*
@@ -14,14 +16,19 @@ private object Main
 
 private val log = logger(Main)
 
-fun main(args: Array<String>) {
+lateinit var database: Database
+
+suspend fun main(args: Array<String>) {
 	log.trace { "Starting up 'main'" }
+
+	log.info { "Connecting to the database…" }
+	database = Database.connect()
 
 	EngineMain.main(args)
 }
 
 fun Application.start() {
-	log.trace("Starting module")
+	log.info("Starting HTTP module")
 
 	install(ContentNegotiation) {
 		json(JsonSerializer)

@@ -7,7 +7,7 @@ dependencies {
 	implementation(project(":core.logger"))
 	api(project(":backend.core"))
 
-	implementation(project(":core.database"))
+	api(project(":core.database"))
 
 	// Ktor
 	api(Ktor.server.core)
