@@ -40,5 +40,9 @@ fun Application.start() {
 			log.warn("call")
 			call.respondText("Hello world!")
 		}
+
+		route("/api") {
+			userRoutes()
+		}
 	}
 }
