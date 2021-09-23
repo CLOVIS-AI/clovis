@@ -183,6 +183,13 @@ class Authenticator(
 	}
 
 	/**
+	 * Checks the validity of a [token]
+	 *
+	 * @see checkAccessToken
+	 */
+	fun checkAccessToken(token: String): User = checkAccessToken(JWT.decode(token))
+
+	/**
 	 * Checks the validity of a [token].
 	 *
 	 * If [token] is a valid refresh token, a [User] is returned. Otherwise, the method fails with an exception.
@@ -195,6 +202,13 @@ class Authenticator(
 
 		return checkToken(token)
 	}
+
+	/**
+	 * Checks the validity of a [token].
+	 *
+	 * @see checkRefreshToken
+	 */
+	fun checkRefreshToken(token: String): User = checkRefreshToken(JWT.decode(token))
 
 	//endregion
 	//region Hashing
