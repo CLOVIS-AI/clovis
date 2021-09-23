@@ -17,6 +17,7 @@ kotlin {
 			dependencies {
 				api(project(":core"))
 				api(project(":app.components"))
+				implementation(project(":core.logger"))
 			}
 		}
 	}
