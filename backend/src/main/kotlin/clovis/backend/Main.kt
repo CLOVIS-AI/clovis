@@ -5,7 +5,10 @@ import clovis.database.Database
 import clovis.logger.info
 import clovis.logger.logger
 import clovis.logger.trace
+import clovis.server.Authenticator
 import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -34,6 +37,23 @@ fun Application.start() {
 		json(JsonSerializer)
 	}
 
+	val authenticator = Authenticator(database)
+	install(Authentication) {
+		jwt {
+			realm = "access-token"
+			verifier(authenticator.verifier)
+			validate { refreshToken ->
+				try {
+					val user = authenticator.checkAccessToken(refreshToken.payload)
+					UserPrincipal(user)
+				} catch (e: Exception) {
+					log.info("Auth: access token refused because of: ${e.stackTraceToString()}")
+					null
+				}
+			}
+		}
+	}
+
 	log.trace("Defining routes")
 	routing {
 		get("/front/index.html") {
@@ -42,7 +62,7 @@ fun Application.start() {
 		}
 
 		route("/api") {
-			userRoutes()
+			userRoutes(authenticator)
 		}
 	}
 }

@@ -121,7 +121,7 @@ class Authenticator(
 	private val secretKey = System.getenv("clovis_jwt_secret")
 		?: error("The environment variable 'clovis_jwt_secret' is missing.")
 	private val algorithm = Algorithm.HMAC256(secretKey)
-	private val verifier = JWT
+	val verifier = JWT
 		.require(algorithm)
 		.withIssuer(CLOVIS_ISSUER)
 		.build()

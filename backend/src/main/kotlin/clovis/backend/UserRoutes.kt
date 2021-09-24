@@ -5,6 +5,7 @@ import clovis.backend.core.UserLoginInfo
 import clovis.server.Authenticator
 import clovis.server.User
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -39,8 +40,7 @@ fun ApplicationCall.setRefreshTokenCookie(value: String) {
 	)
 }
 
-fun Route.userRoutes() = route("/users") {
-	val authenticator = Authenticator(database)
+fun Route.userRoutes(authenticator: Authenticator) = route("/users") {
 
 	suspend fun ApplicationCall.respondCredentials(user: User) {
 		val accessToken = authenticator.createAccessToken(user)
@@ -81,3 +81,5 @@ fun Route.userRoutes() = route("/users") {
 	}
 
 }
+
+class UserPrincipal(val user: User) : Principal
