@@ -8,18 +8,6 @@ import clovis.logger.trace
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.AsyncResultSet
 import com.datastax.oss.driver.api.core.cql.Statement
-import org.intellij.lang.annotations.Language
-
-@Language("CassandraQL")
-private const val CREATE_KEYSPACE = """
-	CREATE KEYSPACE IF NOT EXISTS clovis
-	WITH REPLICATION = { 'class':'SimpleStrategy', 'replication_factor':'1' }
-"""
-
-@Language("CassandraQL")
-private const val CONNECT_TO_KEYSPACE = """
-	USE clovis;
-"""
 
 /**
  * Represents a connection to the database.
@@ -64,13 +52,6 @@ class Database(
 			val session = CqlSession.builder()
 				.buildAsync()
 				.await()
-
-			//region Keyspace
-			// "Detected a keyspace change at runtime": this is safe, because no other threads are using
-			// the keyspace before the end of this function.
-			session.executeAsync(CREATE_KEYSPACE).await()
-			session.executeAsync(CONNECT_TO_KEYSPACE).await()
-			//endregion
 
 			return Database(session)
 		}
