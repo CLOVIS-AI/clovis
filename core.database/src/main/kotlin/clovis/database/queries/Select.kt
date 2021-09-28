@@ -18,8 +18,17 @@ private fun columnExpressions(columns: List<Column<*>>) =
 	if (columns.isEmpty()) "*"
 	else columns.joinToString(separator = ", ") { it.name }
 
+/**
+ * Selects data from a specified [Table].
+ *
+ * All data returned will respect the [where] search criteria.
+ * Setting [where] to `null` allows to query the full database (not recommended, for obvious performance reasons).
+ *
+ * Only the specified [columns] are available in the returned [Row]s.
+ * Specifying no [columns] will query for all columns, although we do not recommend it.
+ */
 suspend fun Table.select(
-	where: SelectExpression,
+	where: SelectExpression?,
 	vararg columns: Column<*>,
 	options: SelectOptions.() -> Unit = {}
 ): Flow<Row> {
@@ -27,8 +36,10 @@ suspend fun Table.select(
 	var query = """
 		select ${columnExpressions(columns.asList())}
 			from $qualifiedName
-			where ${where.encodedValue}
 	""".trimIndent()
+
+	if (where != null)
+		query += "\n\twhere ${where.encodedValue}"
 
 	val optionsDsl = SelectOptions()
 	optionsDsl.options()

@@ -4,6 +4,8 @@ variables:
   OPENJDK_IMAGE: "openjdk:11"
   CASSANDRA_IMAGE: "cassandra:4.0"
 
+  clovis_jwt_secret: "secret"
+
 .gradle:
   script: &prepare_gradle
     - export GRADLE_USER_HOME=$(pwd)/.gradle
@@ -16,7 +18,7 @@ variables:
   services:
     - $CASSANDRA_IMAGE
   script: &prepare_database
-    - cp core.database/src/main/resources/application.gitlab.conf core.database/src/main/resources/application.conf
+    - <core.database/src/main/resources/application.gitlab.conf cat >>core.database/src/main/resources/application.conf
 
 core test-jvm:
   image: $OPENJDK_IMAGE
@@ -32,6 +34,21 @@ core test-jvm:
     when: always
     paths:
       - core/build/reports/tests/
+
+core.primitives test-jvm:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+  script:
+    - ./gradlew core.primitives:jvmTest
+  artifacts:
+    reports:
+      junit: core.primitives/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - core.primitives/build/reports/tests/
 
 core.database test:
   image: $OPENJDK_IMAGE
@@ -65,6 +82,35 @@ money.database test:
     paths:
       - money.database/build/reports/tests/
 
+backend.server test:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle, .database ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - ./gradlew backend.server:test
+  artifacts:
+    reports:
+      junit: backend.server/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - backend.server/build/reports/tests/
+
+dokka:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle ]
+  needs: [ ]
+  before_script:
+    - *prepare_gradle
+  script:
+    # 'assemble' is needed because of https://github.com/Kotlin/dokka/issues/1455
+    - "./gradlew assemble dokkaHtmlMultiModule"
+  artifacts:
+    paths:
+      - build/dokka/htmlMultiModule/
+
 telegram:
   stage: deploy
   image: registry.gitlab.com/clovis-ai/dotfiles:latest
@@ -72,5 +118,19 @@ telegram:
   script:
     - git changelog --format telegram-html --incoming >changelog
     - announce-telegram changelog "$CHAT_IDS"
+  only:
+    - master
+
+pages:
+  image: alpine:latest
+  stage: deploy
+  dependencies: [ dokka ]
+  needs: [ dokka ]
+  script:
+    - mkdir -p public/documentation
+    - mv build/dokka/htmlMultiModule/* public/documentation/
+  artifacts:
+    paths:
+      - public
   only:
     - master

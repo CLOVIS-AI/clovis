@@ -18,6 +18,11 @@ include(
 	"core.database",
 	"core.logger",
 
+	"contacts",
+	"contacts.client",
+	"contacts.server",
+	"contacts.database",
+
 	"money",
 	"money.database",
 
@@ -25,6 +30,7 @@ include(
 	"app.components",
 
 	"backend",
+	"backend.core",
 	"backend.server",
 	"backend.client",
 )

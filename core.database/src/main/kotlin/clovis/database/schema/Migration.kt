@@ -1,12 +1,18 @@
 package clovis.database.schema
 
 import clovis.database.Database
+import clovis.database.queries.UpdateExpression.Companion.set
+import clovis.database.queries.insert
+import clovis.database.queries.select
 import clovis.database.utils.get
 import clovis.database.utils.toFlow
 import clovis.logger.info
 import clovis.logger.logger
 import clovis.logger.trace
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import org.intellij.lang.annotations.Language
@@ -215,4 +221,32 @@ suspend fun Database.drop(table: Table) {
 	""".trimIndent()
 
 	execute(dropTable)
+}
+
+internal suspend fun Database.migrateManualView(view: Table, source: Table) {
+	log.trace { "Checking columns of manual view ${view.qualifiedName} (taking its data from ${source.qualifiedName})…" }
+	for (column in view.columns) {
+		val sourceColumn =
+			source.columns.find { it.name == column.name } // check with the name, because the type (therefore ==) may be different
+		requireNotNull(sourceColumn) { "The column '${column.name}' from the view '${view.qualifiedName}' doesn't exist in the source table '${source.qualifiedName}'" }
+		require(column.type == sourceColumn.type) { "The column '${column.name}' from the view '${view.qualifiedName}' has type ${column.type}, whereas the source table column '${source.qualifiedName}' has type ${sourceColumn.type}" }
+	}
+
+	migrateTable(view)
+
+	log.trace { "Migrating all data from the source table ${source.qualifiedName} to the manual view ${view.qualifiedName}…" }
+	coroutineScope {
+		source.select(where = null, *view.columns.toTypedArray())
+			.collect { row ->
+				launch { // run all INSERTs in parallel
+					val values = Array(view.columns.size) {
+						@Suppress("UNCHECKED_CAST") // Column<*> should always be a valid Column<Any?>
+						val column = view.columns[it] as Column<Any?>
+						column set row[column]
+					}
+
+					view.insert(*values)
+				}
+			}
+	}
 }

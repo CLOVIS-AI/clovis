@@ -3,6 +3,11 @@
     <output_file path="$PROJECT_DIR$/backend/build/server.logs" is_save="true" />
     <log_file alias="logs" path="$PROJECT_DIR$/backend/build/server.logs" />
     <ExternalSystemSettings>
+      <option name="env">
+        <map>
+          <entry key="clovis_jwt_secret" value="secret" />
+        </map>
+      </option>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/backend" />
       <option name="externalSystemIdString" value="GRADLE" />

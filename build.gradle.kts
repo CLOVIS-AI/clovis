@@ -11,6 +11,9 @@ plugins {
 	kotlin("multiplatform") apply false
 	kotlin("jvm") apply false
 	kotlin("plugin.serialization") apply false
+
+	// Project-wide plugins
+	id("org.jetbrains.dokka")
 }
 
 buildscript {
@@ -32,4 +35,6 @@ allprojects {
 			jvmTarget = "1.8"
 		}
 	}
+
+	plugins.apply("org.jetbrains.dokka")
 }

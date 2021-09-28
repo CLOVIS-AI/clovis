@@ -30,10 +30,32 @@ suspend fun Database.table(
 	return Table(
 		name = name,
 		keyspace = keyspace,
-		columns = columns.toList(),
+		columns = columns.asList(),
 		options = optionsDsl.values,
 		database = this,
 	).also { migrateTable(it) }
+}
+
+/**
+ * A manual view is a table that the user is responsible for updating throughout the program's execution.
+ *
+ * When the program starts, the driver will populate the view with data from the source table, however it will not delete stale data from the view.
+ */
+suspend fun Table.manualView(
+	name: String,
+	vararg columns: Column<*>,
+	options: TableOptionsDsl.() -> Unit = {},
+): Table {
+	val optionsDsl = TableOptionsDsl()
+	optionsDsl.options()
+
+	return Table(
+		name = name,
+		keyspace = keyspace,
+		columns = columns.asList(),
+		options = optionsDsl.values,
+		database = database,
+	).also { database.migrateManualView(it, this) }
 }
 
 //endregion
