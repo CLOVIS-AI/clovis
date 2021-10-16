@@ -5,12 +5,33 @@ import clovis.database.schema.Type
 import org.intellij.lang.annotations.Language
 import java.time.Instant
 
-class InsertOptions {
-	var ignoreIfAlreadyExists = false
-	var secondsToLive: Int? = null
-	var timestamp: Instant? = null
-}
-
+/**
+ * Inserts some [values] into a [Table] (CQL `INSERT`).
+ *
+ * Simple insertion example:
+ * ```kotlin
+ * table.insert(
+ *     Columns.id set 1,
+ *     Columns.name set "My name",
+ * )
+ * ```
+ *
+ * Using options example:
+ * ```kotlin
+ * table.insert(
+ *     Columns.id set 1,
+ *     Columns.name set "My Name",
+ * ) {
+ *     secondsToLive = 3600
+ * }
+ * ```
+ *
+ * @param values The values inserted in the table. See [UpdateExpression.Assignment]. To use other [UpdateExpression] implementations, see [update].
+ * @param options Optional request options.
+ * @see update
+ * @see delete
+ * @see select
+ */
 suspend fun Table.insert(vararg values: UpdateExpression.Assignment<*>, options: InsertOptions.() -> Unit = {}) {
 	@Language("CassandraQL")
 	var query = """
@@ -38,4 +59,10 @@ suspend fun Table.insert(vararg values: UpdateExpression.Assignment<*>, options:
 			.replace("<cols>", cols.joinToString(separator = ", "))
 			.replace("<vals>", vals.joinToString(separator = ", "))
 	)
+}
+
+class InsertOptions {
+	var ignoreIfAlreadyExists = false
+	var secondsToLive: Int? = null
+	var timestamp: Instant? = null
 }

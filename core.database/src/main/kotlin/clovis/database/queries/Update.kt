@@ -5,14 +5,19 @@ import clovis.database.schema.Type
 import org.intellij.lang.annotations.Language
 import java.time.Instant
 
-class UpdateOptions {
-	var secondsToLive: Int? = null
-	var timestamp: Instant? = null
-
-	var failIfDoesntExist = false
-	var failIfAlreadyExists = false
-}
-
+/**
+ * Modifies [values] from a [Table] (CQL `UPDATE`).
+ *
+ * @param where A filter expression, used to specify which row·s should be modified.
+ * See [select] and [SelectExpression].
+ * @param values The modifications that should be applied to the selected row·s.
+ * See [insert] and [UpdateExpression].
+ * @param onlyIf An optional filter expression that allows to cancel the update if non-key values of the rows do not match the filter expression.
+ * @param options Optional additional options.
+ * @see select
+ * @see insert
+ * @see delete
+ */
 suspend fun Table.update(
 	where: SelectExpression,
 	vararg values: UpdateExpression<*>,
@@ -47,4 +52,12 @@ suspend fun Table.update(
 		query += "\n\tif not exists"
 
 	database.execute(query)
+}
+
+class UpdateOptions {
+	var secondsToLive: Int? = null
+	var timestamp: Instant? = null
+
+	var failIfDoesntExist = false
+	var failIfAlreadyExists = false
 }
