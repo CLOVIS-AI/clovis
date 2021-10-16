@@ -14,7 +14,9 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				api(project(":core.primitives"))
-				api(project(":core.logger"))
+
+				api(project(":utils.logger"))
+
 				api(project(":remote.core"))
 
 				// Ktor

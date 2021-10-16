@@ -15,7 +15,8 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				api(project(":core.primitives"))
-				api(project(":core.logger"))
+
+				api(project(":utils.logger"))
 
 				// KotlinX
 				api(KotlinX.serialization.core)

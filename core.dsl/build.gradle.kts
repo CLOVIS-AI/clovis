@@ -14,6 +14,7 @@ kotlin {
 		val commonMain by getting {
 			dependencies {
 				api(project(":core.primitives"))
+
 				api(project(":money"))
 			}
 		}

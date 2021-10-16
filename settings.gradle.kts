@@ -12,11 +12,12 @@ plugins {
 }
 
 include(
-	"core",
+	"core.dsl",
 	"core.primitives",
-	"core.test",
-	"core.database",
-	"core.logger",
+
+	"utils.test",
+	"utils.database",
+	"utils.logger",
 
 	"contacts",
 	"contacts.client",

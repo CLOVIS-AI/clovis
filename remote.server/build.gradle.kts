@@ -3,11 +3,13 @@ plugins {
 }
 
 dependencies {
-	api(project(":core"))
-	implementation(project(":core.logger"))
-	api(project(":remote.core"))
+	api(project(":core.dsl"))
 
-	api(project(":core.database"))
+	implementation(project(":utils.logger"))
+	api(project(":utils.database"))
+	testImplementation(project(":utils.test"))
+
+	api(project(":remote.core"))
 
 	// Ktor
 	api(Ktor.server.core)
@@ -18,6 +20,4 @@ dependencies {
 	implementation("at.favre.lib:bcrypt:_")
 	implementation(Ktor.features.auth)
 	implementation(Ktor.features.authJwt)
-
-	testImplementation(project(":core.test"))
 }

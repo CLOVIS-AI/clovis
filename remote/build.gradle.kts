@@ -4,8 +4,10 @@ plugins {
 }
 
 dependencies {
-	api(project(":core"))
-	implementation(project(":core.logger"))
+	api(project(":core.dsl"))
+
+	implementation(project(":utils.logger"))
+
 	implementation(project(":remote.server"))
 
 	implementation(Ktor.features.auth)

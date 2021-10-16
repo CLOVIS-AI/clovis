@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-	implementation(project(":core.logger"))
-	testImplementation(project(":core.test"))
+	implementation(project(":utils.logger"))
+	testImplementation(project(":utils.test"))
 
 	// Kotlin Coroutines
 	api(KotlinX.coroutines.core)

@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-	api(project(":core.database"))
-	api(project(":core.logger"))
-	api(project(":money"))
+	api(project(":utils.database"))
+	api(project(":utils.logger"))
+	testImplementation(project(":utils.test"))
 
-	testImplementation(project(":core.test"))
+	api(project(":money"))
 }
