@@ -29,8 +29,8 @@ include(
 	"app",
 	"app.components",
 
-	"backend",
-	"backend.core",
-	"backend.server",
-	"backend.client",
+	"remote",
+	"remote.core",
+	"remote.server",
+	"remote.client",
 )

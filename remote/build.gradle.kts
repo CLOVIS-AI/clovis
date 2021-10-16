@@ -6,7 +6,7 @@ plugins {
 dependencies {
 	api(project(":core"))
 	implementation(project(":core.logger"))
-	implementation(project(":backend.server"))
+	implementation(project(":remote.server"))
 
 	implementation(Ktor.features.auth)
 	implementation(Ktor.features.authJwt)

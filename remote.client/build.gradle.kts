@@ -15,7 +15,7 @@ kotlin {
 			dependencies {
 				api(project(":core.primitives"))
 				api(project(":core.logger"))
-				api(project(":backend.core"))
+				api(project(":remote.core"))
 
 				// Ktor
 				implementation(Ktor.client.core)

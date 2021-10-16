@@ -5,7 +5,7 @@ plugins {
 dependencies {
 	api(project(":core"))
 	implementation(project(":core.logger"))
-	api(project(":backend.core"))
+	api(project(":remote.core"))
 
 	api(project(":core.database"))
 
