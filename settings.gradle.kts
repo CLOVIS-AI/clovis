@@ -12,12 +12,25 @@ plugins {
 }
 
 include(
+	/*
+	 * Core APIs, used by most modules
+	 */
 	"core.dsl",
 	"core.primitives",
 
+	/*
+	 * Utilitarian libraries internally used to abstract over often used features
+	 */
 	"utils.test",
 	"utils.database",
 	"utils.logger",
+
+	/*
+	 * Implementations of remote providers to communicate with CLOVIS servers
+	 */
+	"remote.core",
+	"remote.server",
+	"remote.client",
 
 	"contacts",
 	"contacts.client",
@@ -27,11 +40,14 @@ include(
 	"money",
 	"money.database",
 
+	/*
+	 * The CLOVIS app
+	 */
 	"app",
 	"app.components",
 
-	"remote",
-	"remote.core",
-	"remote.server",
-	"remote.client",
+	/*
+	 * The CLOVIS server
+	 */
+	"backend",
 )
