@@ -17,7 +17,7 @@ class DbDenominationTest {
 
 		val denominations = DatabaseDenominationProvider(database, DirectCache())
 
-		val ref = denominations.create("Euro", "€", symbolBeforeValue = false)
+		val ref = denominations.creator.create("Euro", "€", symbolBeforeValue = false)
 		val euro: Denomination = ref.request().firstResultOrThrow()
 
 		assertEquals("Euro", euro.name)

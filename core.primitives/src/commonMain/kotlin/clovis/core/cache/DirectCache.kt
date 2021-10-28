@@ -22,7 +22,7 @@ class DirectCache<R : Ref<R, O>, O> : Cache<R, O> {
 		emit(Progress.Loading(ref, lastKnownValue = null))
 
 		// Emit the value from the requested when it is available
-		emitAll(ref.directRequest())
+		emitAll(ref.provider.directRequest(ref))
 	}
 
 	override suspend fun updateAll(values: Iterable<Pair<R, O>>) = Unit

@@ -25,29 +25,14 @@ private object Columns {
 	val symbolBeforeValue = column("sbfv", Type.Binary.Boolean)
 }
 
-data class DbDenominationRef(internal val id: UUID, override val provider: DatabaseDenominationProvider) :
-	Ref<DbDenominationRef, Denomination> {
-	override fun directRequest(): Flow<Progress<DbDenominationRef, Denomination>> = flow {
-		provider.checkTables()
+data class DbDenominationRef(
+	internal val id: UUID,
+	override val provider: DatabaseDenominationProvider,
+) : Ref<DbDenominationRef, Denomination>
 
-		val result = provider.denominations.select(Columns.id eq id)
-			.firstOrNull()
-			?.let {
-				Progress.Success(
-					this@DbDenominationRef,
-					Denomination(
-						name = it[Columns.name],
-						symbol = it[Columns.symbol],
-						symbolBeforeValue = it[Columns.symbolBeforeValue],
-					)
-				)
-			}
-			?: Progress.NotFound(this@DbDenominationRef, message = null)
-
-		emit(result)
-	}
-}
-
+/**
+ * Implementation of the [DenominationProvider] API using the CLOVIS Database.
+ */
 class DatabaseDenominationProvider(
 	private val database: Database,
 	override val cache: Cache<DbDenominationRef, Denomination>
@@ -64,6 +49,26 @@ class DatabaseDenominationProvider(
 				Columns.symbol,
 				Columns.symbolBeforeValue,
 			)
+	}
+
+	override fun directRequest(ref: DbDenominationRef): Flow<Progress<DbDenominationRef, Denomination>> = flow {
+		checkTables()
+
+		val result = denominations.select(Columns.id eq ref.id)
+			.firstOrNull()
+			?.let {
+				Progress.Success(
+					ref,
+					Denomination(
+						name = it[Columns.name],
+						symbol = it[Columns.symbol],
+						symbolBeforeValue = it[Columns.symbolBeforeValue],
+					)
+				)
+			}
+			?: Progress.NotFound(ref, message = null)
+
+		emit(result)
 	}
 
 	override val creator = object : DenominationCreator<DbDenominationRef> {

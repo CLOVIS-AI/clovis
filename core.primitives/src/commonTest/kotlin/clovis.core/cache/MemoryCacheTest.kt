@@ -17,17 +17,17 @@ class MemoryCacheTest {
 	//region Test provider
 	private val job = SupervisorJob()
 	private val intProvider = object : Provider<IntRef, Int> {
+		override fun directRequest(ref: IntRef): Flow<Progress<IntRef, Int>> = flow {
+			if (ref.id > 0) emit(Progress.Success(ref, ref.id))
+			if (ref.id == 0) emit(Progress.Success(ref, Random.nextInt()))
+			else emit(Progress.NotFound(ref, "Negative ids are not allowed: ${ref.id}"))
+		}
+
 		override val cache: Cache<IntRef, Int> = DirectCache<IntRef, Int>()
 			.cachedInMemory(CoroutineScope(job))
 	}
 
 	private inner class IntRef(val id: Int) : Ref<IntRef, Int> {
-		override fun directRequest(): Flow<Progress<IntRef, Int>> = flow {
-			if (id > 0) emit(Progress.Success(this@IntRef, id))
-			if (id == 0) emit(Progress.Success(this@IntRef, Random.nextInt()))
-			else emit(Progress.NotFound(this@IntRef, "Negative ids are not allowed: $id"))
-		}
-
 		override val provider: Provider<IntRef, Int>
 			get() = intProvider
 

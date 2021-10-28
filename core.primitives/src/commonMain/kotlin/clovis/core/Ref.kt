@@ -13,20 +13,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
  * - [request] to query for this object (might be intercepted the provider's [cache][Provider.cache]),
  * - [directRequest] to query to this object directly (bypasses the provider's cache),
  *
+ * The aim is that implementations implement a simple class that stores some kind of ID as well as the [provider] responsible for querying and operating on the matching data.
+ *
  * @param Self The class that implements this [Ref]
  * @param O The type of the object being referenced.
  */
 interface Ref<Self : Ref<Self, O>, O> {
-
-	/**
-	 * Requests data directly from the external resource.
-	 *
-	 * Unlike [request], this method does not go through the [provider]'s [cache][Provider.cache], nor does it update it.
-	 *
-	 * The [Flow] returned by this method is short-lived: it will stop emitting as soon as the first non-loading value is found.
-	 * If the same request is done in the future, flows previously returned by this method will not be updated.
-	 */
-	fun directRequest(): Flow<Progress<Self, O>>
 
 	/**
 	 * The [Provider] responsible for this reference.
@@ -41,13 +33,23 @@ interface Ref<Self : Ref<Self, O>, O> {
  * Requests the data referenced by this [Ref].
  *
  * For performance reasons, the data is queried through the [Ref.provider]'s [cache][Provider.cache].
- * To query the data directly, use [Ref.directRequest].
+ * To query the data directly, use [directRequest].
  *
  * The [Flow] returned by this method is long-lived; see [Cache.get].
  */
 fun <R, O> R.request() where R : Ref<R, O> =
 	provider.cache[this]
 		.distinctUntilChanged()
+
+/**
+ * Requests the data referenced by this [Ref] directly.
+ *
+ * Unlike [request], this call does *not* go through the [Ref.provider]'s [cache][Provider.cache].
+ *
+ * The [Flow] returned by this method short-lived; see [Provider.directRequest].
+ */
+fun <R, O> R.directRequest() where R : Ref<R, O> =
+	provider.directRequest(this)
 
 suspend fun <R, O> R.expire() where R : Ref<R, O> =
 	provider.cache.expire(this)
