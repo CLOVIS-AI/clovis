@@ -7,6 +7,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 /**
  * A reference to a specific [object][O].
  *
+ * A reference is a small object that allows to pass around an object from an API without querying it.
+ * Multiple properties and methods are available:
+ * - [provider] is the [Provider] implementation responsible for the referenced object,
+ * - [request] to query for this object (might be intercepted the provider's [cache][Provider.cache]),
+ * - [directRequest] to query to this object directly (bypasses the provider's cache),
+ *
+ * @param Self The class that implements this [Ref]
  * @param O The type of the object being referenced.
  */
 interface Ref<Self : Ref<Self, O>, O> {
