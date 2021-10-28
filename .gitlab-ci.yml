@@ -1,6 +1,4 @@
 variables:
-  TEST_DB_IMAGE: "$CI_REGISTRY_IMAGE/mariadb-client:$CI_PIPELINE_IID"
-  RELEASE_DB_IMAGE: "$CI_REGISTRY_IMAGE/mariadb-client:latest"
   OPENJDK_IMAGE: "openjdk:11"
   CASSANDRA_IMAGE: "cassandra:4.0"
 
@@ -18,85 +16,44 @@ variables:
   services:
     - $CASSANDRA_IMAGE
   script: &prepare_database
-    - <core.database/src/main/resources/application.gitlab.conf cat >>core.database/src/main/resources/application.conf
+    - <utils.database/src/main/resources/application.gitlab.conf cat >>utils.database/src/main/resources/application.conf
 
-core test-jvm:
+jvm:
+  image: $OPENJDK_IMAGE
+  extends: [ .gradle, .database ]
+  needs: [ ]
+  parallel:
+    matrix:
+      - MODULE: [ utils.database, remote.server, money.database, backend ]
+  before_script:
+    - *prepare_gradle
+    - *prepare_database
+  script:
+    - ./gradlew $MODULE:test
+  artifacts:
+    reports:
+      junit: $MODULE/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - $MODULE/build/reports/tests/
+
+multi-jvm:
   image: $OPENJDK_IMAGE
   extends: [ .gradle ]
   needs: [ ]
+  parallel:
+    matrix:
+      - MODULE: [ core.dsl, core.primitives, remote.core, remote.client, money.core ]
   before_script:
     - *prepare_gradle
   script:
-    - ./gradlew core:jvmTest
+    - ./gradlew $MODULE:jvmTest
   artifacts:
     reports:
-      junit: core/build/test-results/**/TEST-*.xml
+      junit: $MODULE/build/test-results/**/TEST-*.xml
     when: always
     paths:
-      - core/build/reports/tests/
-
-core.primitives test-jvm:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle ]
-  needs: [ ]
-  before_script:
-    - *prepare_gradle
-  script:
-    - ./gradlew core.primitives:jvmTest
-  artifacts:
-    reports:
-      junit: core.primitives/build/test-results/**/TEST-*.xml
-    when: always
-    paths:
-      - core.primitives/build/reports/tests/
-
-core.database test:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle, .database ]
-  needs: [ ]
-  before_script:
-    - *prepare_gradle
-    - *prepare_database
-  script:
-    - ./gradlew core.database:test
-  artifacts:
-    reports:
-      junit: core.database/build/test-results/**/TEST-*.xml
-    when: always
-    paths:
-      - core.database/build/reports/tests/
-
-money.database test:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle, .database ]
-  needs: [ ]
-  before_script:
-    - *prepare_gradle
-    - *prepare_database
-  script:
-    - ./gradlew money.database:test
-  artifacts:
-    reports:
-      junit: money.database/build/test-results/**/TEST-*.xml
-    when: always
-    paths:
-      - money.database/build/reports/tests/
-
-backend.server test:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle, .database ]
-  needs: [ ]
-  before_script:
-    - *prepare_gradle
-    - *prepare_database
-  script:
-    - ./gradlew backend.server:test
-  artifacts:
-    reports:
-      junit: backend.server/build/test-results/**/TEST-*.xml
-    when: always
-    paths:
-      - backend.server/build/reports/tests/
+      - $MODULE/build/reports/tests/
 
 dokka:
   image: $OPENJDK_IMAGE
