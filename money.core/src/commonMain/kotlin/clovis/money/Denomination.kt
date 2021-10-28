@@ -31,9 +31,17 @@ data class Denomination(
 	}
 }
 
-interface DenominationProvider<R : Ref<R, Denomination>> : Provider<R, Denomination>
+/**
+ * The object responsible for querying [Denomination]s.
+ */
+interface DenominationProvider<R : Ref<R, Denomination>> : Provider<R, Denomination> {
+	val creator: DenominationCreator<R>?
+}
 
-interface DenominationCreator<R : Ref<R, Denomination>> : DenominationProvider<R>, ProviderFeature {
+/**
+ * A [DenominationProvider] that can [create] new [Denomination]s.
+ */
+interface DenominationCreator<R : Ref<R, Denomination>> : ProviderFeature {
 
 	/**
 	 * Creates a new [Denomination].

@@ -1,7 +1,6 @@
 package clovis.money.database
 
 import clovis.core.Progress
-import clovis.core.Provider
 import clovis.core.Ref
 import clovis.core.cache.Cache
 import clovis.database.Database
@@ -13,6 +12,7 @@ import clovis.database.schema.*
 import clovis.database.utils.get
 import clovis.money.Denomination
 import clovis.money.DenominationCreator
+import clovis.money.DenominationProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -51,7 +51,7 @@ data class DbDenominationRef(internal val id: UUID, override val provider: Datab
 class DatabaseDenominationProvider(
 	private val database: Database,
 	override val cache: Cache<DbDenominationRef, Denomination>
-) : Provider<DbDenominationRef, Denomination>, DenominationCreator<DbDenominationRef> {
+) : DenominationProvider<DbDenominationRef> {
 
 	internal lateinit var denominations: Table
 
@@ -66,19 +66,21 @@ class DatabaseDenominationProvider(
 			)
 	}
 
-	override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): DbDenominationRef {
-		checkTables()
+	override val creator = object : DenominationCreator<DbDenominationRef> {
+		override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): DbDenominationRef {
+			checkTables()
 
-		val id = UUID.randomUUID()
+			val id = UUID.randomUUID()
 
-		denominations.insert(
-			Columns.id set id,
-			Columns.name set name,
-			Columns.symbol set symbol,
-			Columns.symbolBeforeValue set symbolBeforeValue,
-		)
+			denominations.insert(
+				Columns.id set id,
+				Columns.name set name,
+				Columns.symbol set symbol,
+				Columns.symbolBeforeValue set symbolBeforeValue,
+			)
 
-		return DbDenominationRef(id, this)
+			return DbDenominationRef(id, this@DatabaseDenominationProvider)
+		}
 	}
 
 }
