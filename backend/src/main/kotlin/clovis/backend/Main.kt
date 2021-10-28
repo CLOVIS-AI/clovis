@@ -14,6 +14,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.CoroutineScope
 
 private object Main
 
@@ -37,7 +38,7 @@ fun Application.start() {
 		json(JsonSerializer)
 	}
 
-	val authenticator = Authenticator(database)
+	val authenticator = Authenticator(database, CoroutineScope(coroutineContext))
 	install(Authentication) {
 		jwt {
 			realm = "access-token"

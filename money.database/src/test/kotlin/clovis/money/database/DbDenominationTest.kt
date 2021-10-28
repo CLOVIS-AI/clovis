@@ -6,6 +6,7 @@ import clovis.core.request
 import clovis.database.Database
 import clovis.money.Denomination
 import clovis.test.runTest
+import kotlinx.coroutines.CoroutineScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -15,7 +16,7 @@ class DbDenominationTest {
 	fun createAndGet() = runTest {
 		val database = Database.connect()
 
-		val denominations = DatabaseDenominationProvider(database, DirectCache())
+		val denominations = DatabaseDenominationProvider(database, DirectCache(), CoroutineScope(coroutineContext))
 
 		val ref = denominations.creator.create("Euro", "€", symbolBeforeValue = false)
 		val euro: Denomination = ref.request().firstResultOrThrow()

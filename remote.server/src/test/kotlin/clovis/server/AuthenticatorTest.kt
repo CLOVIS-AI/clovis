@@ -3,6 +3,7 @@ package clovis.server
 import clovis.database.Database
 import clovis.test.runTest
 import com.auth0.jwt.JWT
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -13,7 +14,7 @@ class AuthenticatorTest {
 	@Test
 	fun createUser() = runTest {
 		val database = Database.connect()
-		val auth = Authenticator(database)
+		val auth = Authenticator(database, CoroutineScope(coroutineContext))
 
 		val userId = UUID.randomUUID()
 
@@ -32,7 +33,7 @@ class AuthenticatorTest {
 	@Test
 	fun login() = runTest {
 		val database = Database.connect()
-		val auth = Authenticator(database)
+		val auth = Authenticator(database, CoroutineScope(coroutineContext))
 
 		val userId = UUID.randomUUID()
 
@@ -51,7 +52,7 @@ class AuthenticatorTest {
 	@Test
 	fun tokens() = runTest {
 		val database = Database.connect()
-		val auth = Authenticator(database)
+		val auth = Authenticator(database, CoroutineScope(coroutineContext))
 
 		val userId = UUID.randomUUID()
 

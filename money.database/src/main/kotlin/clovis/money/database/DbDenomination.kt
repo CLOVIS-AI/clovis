@@ -8,11 +8,16 @@ import clovis.database.queries.SelectExpression.Companion.eq
 import clovis.database.queries.UpdateExpression.Companion.set
 import clovis.database.queries.insert
 import clovis.database.queries.select
-import clovis.database.schema.*
+import clovis.database.schema.Type
+import clovis.database.schema.column
+import clovis.database.schema.partitionKey
+import clovis.database.schema.table
 import clovis.database.utils.get
 import clovis.money.Denomination
 import clovis.money.DenominationCreator
 import clovis.money.DenominationProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -35,24 +40,22 @@ data class DbDenominationRef(
  */
 class DatabaseDenominationProvider(
 	private val database: Database,
-	override val cache: Cache<DbDenominationRef, Denomination>
+	override val cache: Cache<DbDenominationRef, Denomination>,
+	scope: CoroutineScope,
 ) : DenominationProvider<DbDenominationRef> {
 
-	internal lateinit var denominations: Table
-
-	internal suspend fun checkTables() {
-		if (!::denominations.isInitialized)
-			denominations = database.table(
-				MoneyKeyspace, "denominations",
-				Columns.id.partitionKey(),
-				Columns.name,
-				Columns.symbol,
-				Columns.symbolBeforeValue,
-			)
+	private val denominationsMigrator = scope.async {
+		database.table(
+			MoneyKeyspace, "denominations",
+			Columns.id.partitionKey(),
+			Columns.name,
+			Columns.symbol,
+			Columns.symbolBeforeValue,
+		)
 	}
 
 	override fun directRequest(ref: DbDenominationRef): Flow<Progress<DbDenominationRef, Denomination>> = flow {
-		checkTables()
+		val denominations = denominationsMigrator.await()
 
 		val result = denominations.select(Columns.id eq ref.id)
 			.firstOrNull()
@@ -73,7 +76,7 @@ class DatabaseDenominationProvider(
 
 	override val creator = object : DenominationCreator<DbDenominationRef> {
 		override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): DbDenominationRef {
-			checkTables()
+			val denominations = denominationsMigrator.await()
 
 			val id = UUID.randomUUID()
 

@@ -9,7 +9,6 @@ import clovis.database.queries.insert
 import clovis.database.queries.select
 import clovis.database.schema.*
 import clovis.database.utils.get
-import clovis.database.utils.suspendLazy
 import clovis.logger.WithLogger
 import clovis.logger.error
 import clovis.logger.info
@@ -17,6 +16,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTCreator
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.Payload
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
 import java.time.Instant
 import java.util.*
@@ -32,9 +33,10 @@ private object Columns {
 
 class Authenticator(
 	private val database: Database,
+	scope: CoroutineScope,
 ) {
 
-	private val users = suspendLazy {
+	private val users = scope.async {
 		database.table(
 			AuthKeyspace, "users",
 			Columns.id.partitionKey(),
@@ -43,8 +45,8 @@ class Authenticator(
 		)
 	}
 
-	private val usersByEmail = suspendLazy {
-		users.get().manualView(
+	private val usersByEmail = scope.async {
+		users.await().manualView(
 			"users_by_email",
 			Columns.email.partitionKey(),
 			Columns.id,
@@ -53,7 +55,7 @@ class Authenticator(
 
 	//region Account access
 
-	suspend fun findUserByEmail(email: String): User? = usersByEmail.get().select(
+	suspend fun findUserByEmail(email: String): User? = usersByEmail.await().select(
 		Columns.email eq email,
 		Columns.id
 	).firstOrNull()?.let { row -> User(row[Columns.id]) }
@@ -70,13 +72,13 @@ class Authenticator(
 
 		val id = UUID.randomUUID()
 
-		users.get().insert(
+		users.await().insert(
 			Columns.id set id,
 			Columns.email set email,
 			Columns.password set hash(password),
 		)
 
-		usersByEmail.get().insert(
+		usersByEmail.await().insert(
 			Columns.id set id,
 			Columns.email set email,
 		)
@@ -90,8 +92,8 @@ class Authenticator(
 	 * The function either successfully returns a [User], or fails with an exception.
 	 */
 	suspend fun login(email: String, password: String): User {
-		val usersTable = users.get()
-		val usersByEmailTable = usersByEmail.get()
+		val usersTable = users.await()
+		val usersByEmailTable = usersByEmail.await()
 
 		val user = findUserByEmail(email)
 		checkNotNull(user) {
