@@ -4,9 +4,11 @@ plugins {
 }
 
 dependencies {
-	api(project(":core"))
-	api(project(":backend.server"))
-	implementation(project(":core.logger"))
+	api(project(":core.dsl"))
+	implementation(project(":utils.logger"))
+
+	api(project(":remote.server"))
+	api(project(":money.core"))
 
 	// Kotlin Coroutines
 	api(KotlinX.coroutines.core)

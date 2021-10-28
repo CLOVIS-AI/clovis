@@ -37,8 +37,10 @@ include(
 	"contacts.server",
 	"contacts.database",
 
-	"money",
+	"money.core",
 	"money.database",
+	"money.server",
+	"money.client",
 
 	/*
 	 * The CLOVIS app
