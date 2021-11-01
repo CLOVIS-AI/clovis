@@ -9,6 +9,7 @@ dependencies {
 	implementation(project(":utils.logger"))
 
 	implementation(project(":remote.server"))
+	implementation(project(":money.server"))
 
 	implementation(Ktor.features.auth)
 	implementation(Ktor.features.authJwt)
