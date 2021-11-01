@@ -36,6 +36,10 @@ data class Denomination(
  */
 interface DenominationProvider<R : Ref<R, Denomination>> : Provider<R, Denomination> {
 	val creator: DenominationCreator<R>?
+
+	companion object {
+		const val CREATOR_FEATURE = "CREATOR"
+	}
 }
 
 /**
