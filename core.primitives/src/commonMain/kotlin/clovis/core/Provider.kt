@@ -3,6 +3,19 @@ package clovis.core
 import clovis.core.cache.Cache
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Common interface for API endpoints.
+ *
+ * A [Provider] represents all endpoints for a specific data type (for example, a wallet).
+ * Each method represents a different endpoint to implement actions on the relevant objects (list all objects, create a new one…).
+ *
+ * The [Provider] interface only enforces two common contracts:
+ * - [directRequest]: How to query an object from the backend from its ID (see [Ref]).
+ * - [cache]: How to temporarily store fetched data on the client-side, to decrease the number of requests.
+ *
+ * Apart from the [directRequest] method, no method should return an API object.
+ * Instead, all methods should return a [reference][Ref] on the object, so each reference can be requested individually through the cache.
+ */
 interface Provider<R : Ref<R, O>, O> {
 
 	val cache: Cache<R, O>
