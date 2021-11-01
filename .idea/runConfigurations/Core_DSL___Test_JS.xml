@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Core Primitives » Test JS" type="GradleRunConfiguration" factoryName="Gradle" folderName="Tests">
+  <configuration default="false" name="Core DSL » Test JS" type="GradleRunConfiguration" factoryName="Gradle" folderName="Tests">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/core.primitives" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$/core.dsl" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
