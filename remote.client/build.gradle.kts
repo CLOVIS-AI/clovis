@@ -20,7 +20,7 @@ kotlin {
 				api(project(":remote.core"))
 
 				// Ktor
-				implementation(Ktor.client.core)
+				api(Ktor.client.core)
 				implementation(Ktor.client.serialization)
 				implementation(Ktor.client.json)
 				implementation(Ktor.client.logging)
