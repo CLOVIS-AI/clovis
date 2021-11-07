@@ -25,18 +25,22 @@ data class RemoteDenomination(
 
 data class RemoteDenominationRef(
 	internal val id: String,
-	override val provider: Provider<RemoteDenominationRef, Denomination>,
-) : Ref<RemoteDenominationRef, Denomination>
+	override val provider: Provider<Denomination>,
+) : Ref<Denomination> {
+	override fun encodeRef(): String = id
+}
 
 class RemoteDenominationProvider(
-	override val cache: Cache<RemoteDenominationRef, Denomination>,
+	override val cache: Cache<Denomination>,
 	client: Client.Authenticated,
 	providerId: String,
 	supportedFeatures: Set<String>,
-) : RemoteProvider<RemoteDenominationRef, Denomination>(client, providerId, "money.denomination"),
-    DenominationProvider<RemoteDenominationRef> {
+) : RemoteProvider<Denomination>(client, providerId, "money.denomination"),
+    DenominationProvider {
 
-	override fun directRequest(ref: RemoteDenominationRef): Flow<Progress<RemoteDenominationRef, Denomination>> = flow {
+	override fun directRequest(ref: Ref<Denomination>): Flow<Progress<Denomination>> = flow {
+		require(ref is RemoteDenominationRef) { "Illegal reference type: $ref" }
+
 		emit(Progress.Loading(ref, lastKnownValue = null))
 
 		val obj = client.get<RemoteDenomination>("$remoteEndpoint/get") {
@@ -50,9 +54,11 @@ class RemoteDenominationProvider(
 		)))
 	}
 
-	override val creator: DenominationCreator<RemoteDenominationRef>? =
+	override fun decodeRef(encoded: String) = RemoteDenominationRef(encoded, this)
+
+	override val creator: DenominationCreator? =
 		if (DenominationProvider.CREATOR_FEATURE !in supportedFeatures) null
-		else object : DenominationCreator<RemoteDenominationRef> {
+		else object : DenominationCreator {
 			override suspend fun create(
 				name: String,
 				symbol: String,

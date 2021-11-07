@@ -5,8 +5,8 @@ import clovis.core.Ref
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-typealias CacheResult<R, O> = Flow<Progress<R, O>>
-typealias MutableCacheResult<R, O> = MutableStateFlow<Progress<R, O>>
+typealias CacheResult<O> = Flow<Progress<O>>
+typealias MutableCacheResult<O> = MutableStateFlow<Progress<O>>
 
 /**
  * Store information in a cheaply accessible medium, to reduce the cost of network requests.
@@ -23,7 +23,7 @@ typealias MutableCacheResult<R, O> = MutableStateFlow<Progress<R, O>>
  * - Stale: an old value is available immediately, which will be replaced by an up-to-date version as soon as it is available ([Progress.Loading] with a [Progress.Loading.lastKnownValue]),
  * - Expired: no values are available ([Progress.Loading] without a [Progress.Loading.lastKnownValue]).
  */
-interface Cache<R : Ref<R, O>, O> {
+interface Cache<O> {
 
 	/**
 	 * Get the object identified by the provided [ref].
@@ -33,7 +33,7 @@ interface Cache<R : Ref<R, O>, O> {
 	 * Unlike [Ref.directRequest], the [Flow] returned by this method is long-lived:
 	 * even if the object is [updated][update] multiple times, the flow will continue notifying its subscribers of the new values.
 	 */
-	operator fun get(ref: R): CacheResult<R, O>
+	operator fun get(ref: Ref<O>): CacheResult<O>
 
 	/**
 	 * Provide a [value] to the cache as up-to-date information.
@@ -45,14 +45,14 @@ interface Cache<R : Ref<R, O>, O> {
 	 *
 	 * @see updateAll
 	 */
-	suspend fun update(ref: R, value: O) = updateAll(listOf(ref to value))
+	suspend fun update(ref: Ref<O>, value: O) = updateAll(listOf(ref to value))
 
 	/**
 	 * Provide multiple [values] to the cache as up-to-date information.
 	 *
 	 * @see update
 	 */
-	suspend fun updateAll(values: Iterable<Pair<R, O>>)
+	suspend fun updateAll(values: Iterable<Pair<Ref<O>, O>>)
 
 	/**
 	 * Communicates to the cache that its value is out-of-date, and should be queried again.
@@ -63,14 +63,14 @@ interface Cache<R : Ref<R, O>, O> {
 	 *
 	 * @see forceRefresh
 	 */
-	suspend fun expire(ref: R)
+	suspend fun expire(ref: Ref<O>)
 
 	/**
 	 * Gets a value that is guaranteed to be up-to-date.
 	 *
 	 * Convenience method for [expire] followed by [get].
 	 */
-	suspend fun forceRefresh(ref: R): CacheResult<R, O> {
+	suspend fun forceRefresh(ref: Ref<O>): CacheResult<O> {
 		expire(ref)
 		return get(ref)
 	}

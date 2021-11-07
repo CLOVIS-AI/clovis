@@ -16,24 +16,29 @@ class MemoryCacheTest {
 
 	//region Test provider
 	private val job = SupervisorJob()
-	private val intProvider = object : Provider<IntRef, Int> {
-		override fun directRequest(ref: IntRef): Flow<Progress<IntRef, Int>> = flow {
+	private val intProvider = object : Provider<Int> {
+		override fun directRequest(ref: Ref<Int>): Flow<Progress<Int>> = flow {
+			require(ref is IntRef) { "Illegal reference type: $ref" }
+
 			if (ref.id > 0) emit(Progress.Success(ref, ref.id))
 			if (ref.id == 0) emit(Progress.Success(ref, Random.nextInt()))
 			else emit(Progress.NotFound(ref, "Negative ids are not allowed: ${ref.id}"))
 		}
 
-		override val cache: Cache<IntRef, Int> = DirectCache<IntRef, Int>()
+		override val cache: Cache<Int> = DirectCache<Int>()
 			.cachedInMemory(CoroutineScope(job))
+
+		override fun decodeRef(encoded: String): Ref<Int> = IntRef(encoded.toInt())
 	}
 
-	private inner class IntRef(val id: Int) : Ref<IntRef, Int> {
-		override val provider: Provider<IntRef, Int>
+	private inner class IntRef(val id: Int) : Ref<Int> {
+		override val provider: Provider<Int>
 			get() = intProvider
 
 		override fun hashCode() = id
 		override fun equals(other: Any?) = (other as? IntRef)?.id == id
 		override fun toString() = "Ref on $id"
+		override fun encodeRef(): String = id.toString()
 	}
 	//endregion
 
@@ -45,8 +50,8 @@ class MemoryCacheTest {
 			.onEach { println(it) }
 			.first { it !is Progress.Loading }
 
-		assertIs<Progress.Success<IntRef, Int>>(result)
-		assertEquals(1, result.ref.id)
+		assertIs<Progress.Success<Int>>(result)
+		assertEquals(1, (result.ref as IntRef).id)
 		assertEquals(1, result.value)
 	}
 
@@ -58,8 +63,8 @@ class MemoryCacheTest {
 			.onEach { println(it) }
 			.first { it !is Progress.Loading }
 
-		assertIs<Progress.NotFound<IntRef, Int>>(result)
-		assertEquals(-1, result.ref.id)
+		assertIs<Progress.NotFound<Int>>(result)
+		assertEquals(-1, (result.ref as IntRef).id)
 	}
 
 	@Test
@@ -72,8 +77,8 @@ class MemoryCacheTest {
 			.onEach { println(it) }
 			.first { it !is Progress.Loading }
 
-		assertIs<Progress.Success<IntRef, Int>>(result)
-		assertEquals(1, result.ref.id)
+		assertIs<Progress.Success<Int>>(result)
+		assertEquals(1, (result.ref as IntRef).id)
 		assertEquals(1, result.value)
 	}
 
@@ -94,7 +99,7 @@ class MemoryCacheTest {
 			delay(10)
 			cache[IntRef(0)]
 				.onEach { println(it) }
-				.filterIsInstance<Progress.Success<IntRef, Int>>()
+				.filterIsInstance<Progress.Success<Int>>()
 				.collect {
 					witness.value = it.value
 				}

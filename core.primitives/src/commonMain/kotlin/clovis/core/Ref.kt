@@ -15,15 +15,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
  *
  * The aim is that implementations implement a simple class that stores some kind of ID as well as the [provider] responsible for querying and operating on the matching data.
  *
- * @param Self The class that implements this [Ref]
  * @param O The type of the object being referenced.
  */
-interface Ref<Self : Ref<Self, O>, O> {
+interface Ref<O> {
 
 	/**
 	 * The [Provider] responsible for this reference.
 	 */
-	val provider: Provider<Self, O>
+	val provider: Provider<O>
 
 	/**
 	 * Encodes this [Ref] as a [String].
@@ -47,7 +46,7 @@ interface Ref<Self : Ref<Self, O>, O> {
  *
  * The [Flow] returned by this method is long-lived; see [Cache.get].
  */
-fun <R, O> R.request() where R : Ref<R, O> =
+fun <O> Ref<O>.request() =
 	provider.cache[this]
 		.distinctUntilChanged()
 
@@ -58,13 +57,13 @@ fun <R, O> R.request() where R : Ref<R, O> =
  *
  * The [Flow] returned by this method short-lived; see [Provider.directRequest].
  */
-fun <R, O> R.directRequest() where R : Ref<R, O> =
+fun <O> Ref<O>.directRequest() =
 	provider.directRequest(this)
 
-suspend fun <R, O> R.expire() where R : Ref<R, O> =
+suspend fun <O> Ref<O>.expire() =
 	provider.cache.expire(this)
 
-suspend fun <R, O> R.update(value: O) where R : Ref<R, O> =
+suspend fun <O> Ref<O>.update(value: O) =
 	provider.cache.update(this, value)
 
 //endregion

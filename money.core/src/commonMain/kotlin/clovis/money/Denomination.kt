@@ -34,8 +34,8 @@ data class Denomination(
 /**
  * The object responsible for querying [Denomination]s.
  */
-interface DenominationProvider<R : Ref<R, Denomination>> : Provider<R, Denomination> {
-	val creator: DenominationCreator<R>?
+interface DenominationProvider : Provider<Denomination> {
+	val creator: DenominationCreator?
 
 	companion object {
 		const val CREATOR_FEATURE = "CREATOR"
@@ -45,11 +45,11 @@ interface DenominationProvider<R : Ref<R, Denomination>> : Provider<R, Denominat
 /**
  * A [DenominationProvider] that can [create] new [Denomination]s.
  */
-interface DenominationCreator<R : Ref<R, Denomination>> : ProviderFeature {
+interface DenominationCreator : ProviderFeature {
 
 	/**
 	 * Creates a new [Denomination].
 	 */
-	suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): R
+	suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): Ref<Denomination>
 
 }

@@ -6,13 +6,13 @@ import kotlinx.coroutines.CoroutineScope
 
 //region Cache implementation shortcuts
 
-fun <R, O> Cache<R, O>.cachedInMemory(scope: CoroutineScope) where R : Ref<R, O> =
+fun <O> Cache<O>.cachedInMemory(scope: CoroutineScope) =
 	MemoryCache(this, scope)
 
 //endregion
 //region Cache extensions
 
-suspend fun <R, O> Cache<R, O>.getOrThrow(id: R): O where R : Ref<R, O> =
+suspend fun <O> Cache<O>.getOrThrow(id: Ref<O>): O =
 	get(id).firstResultOrThrow()
 
 //endregion

@@ -33,16 +33,18 @@ private object Columns {
 data class DbDenominationRef(
 	internal val id: UUID,
 	override val provider: DatabaseDenominationProvider,
-) : Ref<DbDenominationRef, Denomination>
+) : Ref<Denomination> {
+	override fun encodeRef() = id.toString()
+}
 
 /**
  * Implementation of the [DenominationProvider] API using the CLOVIS Database.
  */
 class DatabaseDenominationProvider(
 	private val database: Database,
-	override val cache: Cache<DbDenominationRef, Denomination>,
+	override val cache: Cache<Denomination>,
 	scope: CoroutineScope,
-) : DenominationProvider<DbDenominationRef> {
+) : DenominationProvider {
 
 	private val denominationsMigrator = scope.async {
 		database.table(
@@ -54,7 +56,9 @@ class DatabaseDenominationProvider(
 		)
 	}
 
-	override fun directRequest(ref: DbDenominationRef): Flow<Progress<DbDenominationRef, Denomination>> = flow {
+	override fun directRequest(ref: Ref<Denomination>): Flow<Progress<Denomination>> = flow {
+		require(ref is DbDenominationRef) { "Illegal reference type: $ref" }
+
 		val denominations = denominationsMigrator.await()
 
 		val result = denominations.select(Columns.id eq ref.id)
@@ -74,7 +78,9 @@ class DatabaseDenominationProvider(
 		emit(result)
 	}
 
-	override val creator = object : DenominationCreator<DbDenominationRef> {
+	override fun decodeRef(encoded: String) = DbDenominationRef(UUID.fromString(encoded), this)
+
+	override val creator = object : DenominationCreator {
 		override suspend fun create(name: String, symbol: String, symbolBeforeValue: Boolean): DbDenominationRef {
 			val denominations = denominationsMigrator.await()
 
