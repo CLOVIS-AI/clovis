@@ -25,6 +25,16 @@ interface Ref<Self : Ref<Self, O>, O> {
 	 */
 	val provider: Provider<Self, O>
 
+	/**
+	 * Encodes this [Ref] as a [String].
+	 *
+	 * This is used to transmit the reference to other machines when using remote providers.
+	 * The returned [String] can be in whatever format the implementer likes, as long as:
+	 * - the exact same format can be given to [Provider.decodeRef] to construct a reference identical to the one
+	 * passed as parameter to [encodeRef] (identical according to [Any.equals]),
+	 * - it does not contain any secret information (it might be sent to another machine).
+	 */
+	fun encodeRef(): String
 }
 
 //region Extensions

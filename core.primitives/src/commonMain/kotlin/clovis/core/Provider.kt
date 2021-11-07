@@ -28,4 +28,10 @@ interface Provider<R : Ref<R, O>, O> {
 	 */
 	fun directRequest(ref: R): Flow<Progress<R, O>>
 
+	/**
+	 * Decodes a [String] to a [Ref].
+	 *
+	 * The format requirements are explained in [Ref.encodeRef]'s documentation.
+	 */
+	fun decodeRef(encoded: String): R
 }
