@@ -14,14 +14,6 @@ import clovis.money.DenominationProvider
 import io.ktor.client.request.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class RemoteDenomination(
-	val name: String,
-	val symbol: String,
-	val symbolBeforeValue: Boolean,
-)
 
 data class RemoteDenominationRef(
 	internal val id: String,
@@ -43,15 +35,11 @@ class RemoteDenominationProvider(
 
 		emit(Progress.Loading(ref, lastKnownValue = null))
 
-		val obj = client.get<RemoteDenomination>("$remoteEndpoint/get") {
+		val obj = client.get<Denomination>("$remoteEndpoint/get") {
 			parameter("id", ref.id)
 		}
 
-		emit(Progress.Success(ref, Denomination(
-			name = obj.name,
-			symbol = obj.symbol,
-			symbolBeforeValue = obj.symbolBeforeValue,
-		)))
+		emit(Progress.Success(ref, obj))
 	}
 
 	override fun decodeRef(encoded: String) = RemoteDenominationRef(encoded, this)
@@ -64,7 +52,7 @@ class RemoteDenominationProvider(
 				symbol: String,
 				symbolBeforeValue: Boolean,
 			): RemoteDenominationRef {
-				val id = client.put<String>("$remoteEndpoint/create", body = RemoteDenomination(
+				val id = client.put<String>("$remoteEndpoint/create", body = Denomination(
 					name, symbol, symbolBeforeValue
 				))
 
