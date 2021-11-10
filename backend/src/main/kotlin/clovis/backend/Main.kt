@@ -5,7 +5,10 @@ import clovis.database.Database
 import clovis.logger.info
 import clovis.logger.logger
 import clovis.logger.trace
+import clovis.money.server.remoteDenominations
 import clovis.server.Authenticator
+import clovis.server.UserPrincipal
+import clovis.server.UserProviders
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -55,6 +58,8 @@ fun Application.start() {
 		}
 	}
 
+	val userProviders = UserProviders()
+
 	log.trace("Defining routes")
 	routing {
 		get("/front/index.html") {
@@ -64,6 +69,12 @@ fun Application.start() {
 
 		route("/api") {
 			userRoutes(authenticator)
+		}
+
+		route("/remote") {
+			authenticate {
+				remoteDenominations(userProviders)
+			}
 		}
 	}
 }
