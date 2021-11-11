@@ -10,6 +10,7 @@ dependencies {
 	testImplementation(project(":utils.test"))
 
 	api(project(":remote.core"))
+	api(project(":money.database"))
 
 	// Ktor
 	api(Ktor.server.core)

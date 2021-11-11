@@ -18,6 +18,7 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 private object Main
 
@@ -58,7 +59,8 @@ fun Application.start() {
 		}
 	}
 
-	val userProviders = UserProviders()
+	val userProvidersJob = Job()
+	val userProviders = UserProviders(database, CoroutineScope(userProvidersJob))
 
 	log.trace("Defining routes")
 	routing {

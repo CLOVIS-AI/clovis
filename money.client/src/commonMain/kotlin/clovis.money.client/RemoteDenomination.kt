@@ -27,7 +27,7 @@ class RemoteDenominationProvider(
 	client: Client.Authenticated,
 	providerId: String,
 	supportedFeatures: Set<String>,
-) : RemoteProvider<Denomination>(client, providerId, "money.denomination"),
+) : RemoteProvider<Denomination>(client, providerId, Denomination.PROVIDER_TYPE_ID),
     DenominationProvider {
 
 	override fun directRequest(ref: Ref<Denomination>): Flow<Progress<Denomination>> = flow {

@@ -31,6 +31,10 @@ data class Denomination(
 		includeSymbol && !symbolBeforeValue -> "$sum$symbol"
 		else -> "$sum"
 	}
+
+	companion object {
+		const val PROVIDER_TYPE_ID = "money.denomination"
+	}
 }
 
 /**
