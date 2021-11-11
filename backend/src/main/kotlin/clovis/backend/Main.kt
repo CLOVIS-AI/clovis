@@ -5,7 +5,10 @@ import clovis.database.Database
 import clovis.logger.info
 import clovis.logger.logger
 import clovis.logger.trace
+import clovis.money.server.remoteDenominations
 import clovis.server.Authenticator
+import clovis.server.UserPrincipal
+import clovis.server.UserProviders
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -14,6 +17,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 private object Main
 
@@ -37,7 +42,7 @@ fun Application.start() {
 		json(JsonSerializer)
 	}
 
-	val authenticator = Authenticator(database)
+	val authenticator = Authenticator(database, CoroutineScope(coroutineContext))
 	install(Authentication) {
 		jwt {
 			realm = "access-token"
@@ -54,6 +59,9 @@ fun Application.start() {
 		}
 	}
 
+	val userProvidersJob = Job()
+	val userProviders = UserProviders(database, CoroutineScope(userProvidersJob))
+
 	log.trace("Defining routes")
 	routing {
 		get("/front/index.html") {
@@ -63,6 +71,12 @@ fun Application.start() {
 
 		route("/api") {
 			userRoutes(authenticator)
+		}
+
+		route("/remote") {
+			authenticate {
+				remoteDenominations(userProviders)
+			}
 		}
 	}
 }

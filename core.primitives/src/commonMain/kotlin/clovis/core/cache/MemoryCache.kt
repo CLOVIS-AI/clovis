@@ -15,14 +15,14 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class MemoryCache<R : Ref<R, O>, O> constructor(
-	private val upstream: Cache<R, O>,
+class MemoryCache<O> constructor(
+	private val upstream: Cache<O>,
 	private val scope: CoroutineScope,
 	private val staleAfter: Duration = Duration.minutes(3),
 	private val clearAfter: Duration = Duration.minutes(30),
-) : Cache<R, O> {
+) : Cache<O> {
 
-	private val data = HashMap<R, MutableStateFlow<CacheEntry<R, O>>>()
+	private val data = HashMap<Ref<O>, MutableStateFlow<CacheEntry<O>>>()
 	private val lock = Semaphore(1)
 
 	init {
@@ -44,15 +44,15 @@ class MemoryCache<R : Ref<R, O>, O> constructor(
 		}
 	}
 
-	private fun unsafeGet(ref: R) = data.getOrPut(ref) {
+	private fun unsafeGet(ref: Ref<O>) = data.getOrPut(ref) {
 		MutableStateFlow(CacheEntry(null))
 	}
 
-	private fun requestProvider(element: MutableStateFlow<CacheEntry<R, O>>, ref: R) {
+	private fun requestProvider(element: MutableStateFlow<CacheEntry<O>>, ref: Ref<O>) {
 		require(scope.isActive) { "This cache currently doesn't have an active job, which makes it unable to function properly." }
 
 		// Start of the request, set state to 'loading'
-		val loader = Progress.Loading(ref, lastKnownValue = element.value.obj as? Progress.Result<R, O>)
+		val loader = Progress.Loading(ref, lastKnownValue = element.value.obj as? Progress.Result<O>)
 		element.value = CacheEntry(loader)
 
 		scope.launch {
@@ -69,7 +69,7 @@ class MemoryCache<R : Ref<R, O>, O> constructor(
 		}
 	}
 
-	override fun get(ref: R): CacheResult<R, O> = flow {
+	override fun get(ref: Ref<O>): CacheResult<O> = flow {
 		emit(Progress.Loading(ref, lastKnownValue = null))
 
 		emitAll(lock.withPermit {
@@ -86,7 +86,7 @@ class MemoryCache<R : Ref<R, O>, O> constructor(
 		})
 	}
 
-	override suspend fun updateAll(values: Iterable<Pair<R, O>>) {
+	override suspend fun updateAll(values: Iterable<Pair<Ref<O>, O>>) {
 		lock.withPermit {
 			for ((id, value) in values) {
 				unsafeGet(id).value = CacheEntry(Progress.Success(id, value))
@@ -94,7 +94,7 @@ class MemoryCache<R : Ref<R, O>, O> constructor(
 		}
 	}
 
-	override suspend fun expire(ref: R) {
+	override suspend fun expire(ref: Ref<O>) {
 		upstream.expire(ref)
 		lock.withPermit {
 			val element = unsafeGet(ref)
@@ -103,7 +103,7 @@ class MemoryCache<R : Ref<R, O>, O> constructor(
 	}
 }
 
-private data class CacheEntry<R : Ref<R, O>, O>(
-	val obj: Progress<R, O>?,
+private data class CacheEntry<O>(
+	val obj: Progress<O>?,
 	val timestamp: Instant = Clock.System.now(),
 )

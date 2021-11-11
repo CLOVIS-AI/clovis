@@ -15,10 +15,13 @@ kotlin {
 	sourceSets {
 		val commonMain by getting {
 			dependencies {
-				api(project(":core"))
+				api(project(":core.dsl"))
+
+				implementation(project(":utils.logger"))
+
+				implementation(project(":remote.client"))
+
 				api(project(":app.components"))
-				implementation(project(":core.logger"))
-				implementation(project(":backend.client"))
 			}
 		}
 	}

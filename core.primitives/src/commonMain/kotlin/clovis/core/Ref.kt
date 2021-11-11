@@ -7,25 +7,33 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 /**
  * A reference to a specific [object][O].
  *
+ * A reference is a small object that allows to pass around an object from an API without querying it.
+ * Multiple properties and methods are available:
+ * - [provider] is the [Provider] implementation responsible for the referenced object,
+ * - [request] to query for this object (might be intercepted the provider's [cache][Provider.cache]),
+ * - [directRequest] to query to this object directly (bypasses the provider's cache),
+ *
+ * The aim is that implementations implement a simple class that stores some kind of ID as well as the [provider] responsible for querying and operating on the matching data.
+ *
  * @param O The type of the object being referenced.
  */
-interface Ref<Self : Ref<Self, O>, O> {
-
-	/**
-	 * Requests data directly from the external resource.
-	 *
-	 * Unlike [request], this method does not go through the [provider]'s [cache][Provider.cache], nor does it update it.
-	 *
-	 * The [Flow] returned by this method is short-lived: it will stop emitting as soon as the first non-loading value is found.
-	 * If the same request is done in the future, flows previously returned by this method will not be updated.
-	 */
-	fun directRequest(): Flow<Progress<Self, O>>
+interface Ref<O> {
 
 	/**
 	 * The [Provider] responsible for this reference.
 	 */
-	val provider: Provider<Self, O>
+	val provider: Provider<O>
 
+	/**
+	 * Encodes this [Ref] as a [String].
+	 *
+	 * This is used to transmit the reference to other machines when using remote providers.
+	 * The returned [String] can be in whatever format the implementer likes, as long as:
+	 * - the exact same format can be given to [Provider.decodeRef] to construct a reference identical to the one
+	 * passed as parameter to [encodeRef] (identical according to [Any.equals]),
+	 * - it does not contain any secret information (it might be sent to another machine).
+	 */
+	fun encodeRef(): String
 }
 
 //region Extensions
@@ -34,18 +42,28 @@ interface Ref<Self : Ref<Self, O>, O> {
  * Requests the data referenced by this [Ref].
  *
  * For performance reasons, the data is queried through the [Ref.provider]'s [cache][Provider.cache].
- * To query the data directly, use [Ref.directRequest].
+ * To query the data directly, use [directRequest].
  *
  * The [Flow] returned by this method is long-lived; see [Cache.get].
  */
-fun <R, O> R.request() where R : Ref<R, O> =
+fun <O> Ref<O>.request() =
 	provider.cache[this]
 		.distinctUntilChanged()
 
-suspend fun <R, O> R.expire() where R : Ref<R, O> =
+/**
+ * Requests the data referenced by this [Ref] directly.
+ *
+ * Unlike [request], this call does *not* go through the [Ref.provider]'s [cache][Provider.cache].
+ *
+ * The [Flow] returned by this method short-lived; see [Provider.directRequest].
+ */
+fun <O> Ref<O>.directRequest() =
+	provider.directRequest(this)
+
+suspend fun <O> Ref<O>.expire() =
 	provider.cache.expire(this)
 
-suspend fun <R, O> R.update(value: O) where R : Ref<R, O> =
+suspend fun <O> Ref<O>.update(value: O) =
 	provider.cache.update(this, value)
 
 //endregion
