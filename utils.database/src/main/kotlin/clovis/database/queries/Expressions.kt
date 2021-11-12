@@ -50,6 +50,12 @@ sealed class UpdateExpression<T>(val column: Column<T>) : Expression {
 				else "${column.name} - ${-increment}"
 	}
 
+	class SetModification<T>(column: Column<Set<T>>, private val add: Boolean, private val value: Set<T>) :
+		UpdateExpression<Set<T>>(column) {
+		override val encodedValue: String
+			get() = "${column.name} ${if (add) "+" else "-"} ${column.type.encode(value)}"
+	}
+
 	companion object {
 
 		/**
@@ -92,6 +98,9 @@ sealed class UpdateExpression<T>(val column: Column<T>) : Expression {
 		 * ```
 		 */
 		infix fun Column<Long>.decrement(value: Long) = CounterIncrement(this, -value)
+
+		infix fun <T> Column<Set<T>>.add(value: Set<T>) = SetModification(this, true, value)
+		infix fun <T> Column<Set<T>>.remove(value: Set<T>) = SetModification(this, false, value)
 
 	}
 }

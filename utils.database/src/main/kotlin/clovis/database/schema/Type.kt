@@ -1,10 +1,8 @@
 package clovis.database.schema
 
+import clovis.database.schema.Type.Collections.Set
 import clovis.database.utils.asStringLiteral
-import clovis.database.utils.fromStringLiteral
 import com.datastax.oss.driver.api.core.type.reflect.GenericType
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.Instant
 import java.time.LocalTime
 
@@ -176,10 +174,22 @@ sealed interface Type<T : Any?> {
 				else "null"
 		}
 
+		data class Set<T>(val contents: Type<T>) : Type<kotlin.collections.Set<T>> {
+			override val codec: GenericType<out kotlin.collections.Set<T>> = GenericType.setOf(contents.codec)
+
+			override val type: String
+				get() = "set<${contents.type}>"
+
+			override fun encode(value: kotlin.collections.Set<T>) =
+				value.joinToString(prefix = "{ ", postfix = " }", separator = ", ") { contents.encode(it) }
+		}
+
 	}
 
 	companion object {
 		fun fromCqlName(string: String): Type<*> {
+			val cleanedString = string.trim()
+
 			val simpleTypes = sequenceOf(
 				Binary.Text, Binary.TextASCII, Binary.Binary, Binary.Boolean, Binary.Inet, Binary.UUID,
 				Number.Byte, Number.Short, Number.Int, Number.Long, Number.BigInteger,
@@ -188,10 +198,17 @@ sealed interface Type<T : Any?> {
 				Dates.Timestamp, Dates.Date, Dates.Time, Dates.Duration,
 			)
 
-			val simpleResult = simpleTypes.find { it.type == string }
-			if (simpleResult != null)
-				return simpleResult
-			else error("Type '$string' could not be interpreted.")
+			val simpleResult = simpleTypes.find { it.type == cleanedString }
+			return when {
+				simpleResult != null -> simpleResult
+				cleanedString.startsWith("set") -> Set(fromCqlName(
+					cleanedString
+						.removePrefix("set")
+						.trimStart()
+						.removeSurrounding("<", ">")
+				))
+				else -> error("The type ‘$cleanedString’ could not be recognized.")
+			}
 		}
 
 		fun <T : Any> Type<T>.orNull() = Collections.Nullable(this)
