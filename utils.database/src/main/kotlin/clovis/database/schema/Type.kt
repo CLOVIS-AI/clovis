@@ -164,7 +164,7 @@ sealed interface Type<T : Any?> {
 		 *
 		 * @see orNull
 		 */
-		class Nullable<T : Any>(val contents: Type<T>) : Type<T?> {
+		data class Nullable<T : Any>(val contents: Type<T>) : Type<T?> {
 			override val codec: GenericType<out T>
 				get() = contents.codec // In Cassandra, all types are nullable anyway
 
