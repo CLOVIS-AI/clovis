@@ -38,6 +38,18 @@ sealed class UpdateExpression<T>(val column: Column<T>) : Expression {
 		override val encodedValue get() = column.type.encode(value)
 	}
 
+	/**
+	 * Increments a counter column by a specific [increment].
+	 *
+	 * DSL operators: [increment], [decrement].
+	 */
+	class CounterIncrement(column: Column<Long>, private val increment: Long) : UpdateExpression<Long>(column) {
+		override val encodedValue
+			get() =
+				if (increment >= 0) "${column.name} + $increment"
+				else "${column.name} - ${-increment}"
+	}
+
 	companion object {
 
 		/**
@@ -52,6 +64,34 @@ sealed class UpdateExpression<T>(val column: Column<T>) : Expression {
 		 * ```
 		 */
 		infix fun <T> Column<T>.set(value: T) = Assignment(this, value)
+
+		/**
+		 * DSL operator for [CounterIncrement].
+		 *
+		 * Example usage:
+		 * ```kotlin
+		 * someTable.update(
+		 *     Columns.id eq 1,
+		 *     Columns.views increment 1,
+		 * )
+		 * ```
+		 *
+		 * @see decrement
+		 */
+		infix fun Column<Long>.increment(value: Long) = CounterIncrement(this, value)
+
+		/**
+		 * DSL operator for [CounterIncrement].
+		 *
+		 * Example usage:
+		 * ```kotlin
+		 * someTable.update(
+		 *     Columns.id eq 1,
+		 *     Columns.followers decrement 1,
+		 * )
+		 * ```
+		 */
+		infix fun Column<Long>.decrement(value: Long) = CounterIncrement(this, -value)
 
 	}
 }
