@@ -4,6 +4,8 @@ import clovis.database.Database
 import clovis.database.TestKeyspace
 import clovis.database.queries.SelectExpression.Companion.eq
 import clovis.database.queries.SelectExpression.Companion.isOneOf
+import clovis.database.queries.UpdateExpression.Companion.decrement
+import clovis.database.queries.UpdateExpression.Companion.increment
 import clovis.database.queries.UpdateExpression.Companion.set
 import clovis.database.queries.delete
 import clovis.database.queries.insert
@@ -11,8 +13,10 @@ import clovis.database.queries.select
 import clovis.database.queries.update
 import clovis.database.utils.get
 import clovis.test.runTest
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import org.junit.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -171,6 +175,56 @@ class QueriesTest {
 		println("Checking results")
 		val results = table.select(id eq uuid).toList()
 		assertEquals(1, results.size, "Found: ${results.joinToString { it.formattedContents }}")
+	}
+
+	@Test
+	fun counters() = runTest {
+		val database = Database.connect()
+
+		println("Creating table…")
+		val id = column("id", Type.Binary.UUID)
+		val likes = column("score", Type.Number.Counter)
+
+		val table = database.table(
+			TestKeyspace, "queries_counters",
+			id.partitionKey(),
+			likes,
+		)
+
+		val uuid = UUID.randomUUID()
+
+		println("Inserting default value…")
+		table.update(
+			id eq uuid,
+			likes increment 0,
+		)
+
+		println("Querying default value…")
+		assertEquals(0, table.select(id eq uuid, likes).first()[likes])
+
+		println("Counter operations…")
+		coroutineScope {
+			repeat(5) {
+				launch {
+					table.update(
+						id eq uuid,
+						likes increment 1,
+					)
+				}
+			}
+
+			repeat(3) {
+				launch {
+					table.update(
+						id eq uuid,
+						likes decrement 1,
+					)
+				}
+			}
+		}
+
+		println("Checking result…")
+		assertEquals(2, table.select(id eq uuid, likes).first()[likes])
 	}
 
 }
