@@ -10,6 +10,7 @@ import clovis.database.queries.SelectExpression.Companion.isOneOf
 import clovis.database.queries.UpdateExpression.Assignment
 import clovis.database.queries.UpdateExpression.Companion.set
 import clovis.database.schema.Column
+import clovis.database.schema.Type
 
 /**
  * Different kinds of expressions that can be used in database queries.
@@ -54,6 +55,18 @@ sealed class UpdateExpression<T>(val column: Column<T>) : Expression {
 		UpdateExpression<Set<T>>(column) {
 		override val encodedValue: String
 			get() = "${column.name} ${if (add) "+" else "-"} ${column.type.encode(value)}"
+	}
+
+	class MapInsertion<K, V>(column: Column<Map<out K, V>>, private val value: Map<K, V>) :
+		UpdateExpression<Map<out K, V>>(column) {
+		override val encodedValue: String
+			get() = "${column.name} + ${column.type.encode(value)}"
+	}
+
+	class MapDeletion<K, V>(column: Column<Map<out K, V>>, private val keys: Set<K>) :
+		UpdateExpression<Map<out K, V>>(column) {
+		override val encodedValue: String
+			get() = "${column.name} - ${(column.type as Type.Collections.Map<K, V>).keyType.encode(keys)}"
 	}
 
 	companion object {
@@ -102,6 +115,8 @@ sealed class UpdateExpression<T>(val column: Column<T>) : Expression {
 		infix fun <T> Column<Set<T>>.add(value: Set<T>) = SetModification(this, true, value)
 		infix fun <T> Column<Set<T>>.remove(value: Set<T>) = SetModification(this, false, value)
 
+		infix fun <K, V> Column<Map<out K, V>>.add(value: Map<K, V>) = MapInsertion(this, value)
+		infix fun <K, V> Column<Map<out K, V>>.remove(keys: Set<K>) = MapDeletion(this, keys)
 	}
 }
 

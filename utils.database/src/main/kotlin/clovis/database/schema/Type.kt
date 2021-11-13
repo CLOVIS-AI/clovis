@@ -1,7 +1,10 @@
 package clovis.database.schema
 
+import clovis.database.schema.Type.Collections.Map
 import clovis.database.schema.Type.Collections.Set
 import clovis.database.utils.asStringLiteral
+import clovis.logger.WithLogger
+import clovis.logger.trace
 import com.datastax.oss.driver.api.core.type.reflect.GenericType
 import java.time.Instant
 import java.time.LocalTime
@@ -184,10 +187,24 @@ sealed interface Type<T : Any?> {
 				value.joinToString(prefix = "{ ", postfix = " }", separator = ", ") { contents.encode(it) }
 		}
 
+		data class Map<K, V>(val key: Type<K>, val contents: Type<V>) : Type<kotlin.collections.Map<out K, V>> {
+			override val codec: GenericType<out MutableMap<out K, out V>> = GenericType.mapOf(key.codec, contents.codec)
+
+			val keyType = Set(key)
+
+			override val type: String
+				get() = "map<${key.type}, ${contents.type}>"
+
+			override fun encode(value: kotlin.collections.Map<out K, V>): String =
+				value.map { (k, v) -> "${key.encode(k)}: ${contents.encode(v)}" }
+					.joinToString(prefix = "{ ", postfix = " }", separator = ", ")
+		}
+
 	}
 
-	companion object {
+	companion object : WithLogger() {
 		fun fromCqlName(string: String): Type<*> {
+			log.trace { "Parsing type ‘$string’" }
 			val cleanedString = string.trim()
 
 			val simpleTypes = sequenceOf(
@@ -207,6 +224,14 @@ sealed interface Type<T : Any?> {
 						.trimStart()
 						.removeSurrounding("<", ">")
 				))
+				cleanedString.startsWith("map") -> {
+					val cleanedMap =
+						cleanedString.removePrefix("map").trimStart().removeSurrounding("<", ">").split(",")
+					Map(
+						fromCqlName(cleanedMap[0]),
+						fromCqlName(cleanedMap[1]),
+					)
+				}
 				else -> error("The type ‘$cleanedString’ could not be recognized.")
 			}
 		}
