@@ -1,10 +1,11 @@
 package clovis.database.schema
 
+import clovis.database.schema.Type.Collections.Map
+import clovis.database.schema.Type.Collections.Set
 import clovis.database.utils.asStringLiteral
-import clovis.database.utils.fromStringLiteral
+import clovis.logger.WithLogger
+import clovis.logger.trace
 import com.datastax.oss.driver.api.core.type.reflect.GenericType
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.Instant
 import java.time.LocalTime
 
@@ -17,11 +18,6 @@ sealed interface Type<T : Any?> {
 	 * Encodes the [value] into a C* query-compatible [String].
 	 */
 	fun encode(value: T): String
-
-	/**
-	 * Decodes the [value] from a C* query-compatible [String] into a Kotlin type.
-	 */
-	fun decode(value: String): T
 
 	/**
 	 * The name of the C* type mapped by this [Type], as it appears in queries.
@@ -42,28 +38,24 @@ sealed interface Type<T : Any?> {
 			override val codec: GenericType<String> get() = GenericType.STRING
 			override val type = "text"
 			override fun encode(value: String) = value.asStringLiteral()
-			override fun decode(value: String) = value.fromStringLiteral()
 		}
 
 		object TextASCII : StatelessType<String>() {
 			override val codec: GenericType<String> get() = GenericType.STRING
 			override val type = "ascii"
 			override fun encode(value: String) = value.asStringLiteral()
-			override fun decode(value: String) = value.fromStringLiteral()
 		}
 
 		object Binary : StatelessType<ByteArray>() {
 			override val codec: GenericType<ByteArray> = GenericType.of(ByteArray::class.java)
 			override val type = "blob"
 			override fun encode(value: ByteArray) = value.decodeToString()
-			override fun decode(value: String) = value.encodeToByteArray()
 		}
 
 		object Boolean : StatelessType<kotlin.Boolean>() {
 			override val codec: GenericType<kotlin.Boolean> get() = GenericType.BOOLEAN
 			override val type = "boolean"
 			override fun encode(value: kotlin.Boolean) = value.toString()
-			override fun decode(value: String) = value.toBooleanStrict()
 		}
 
 		object Inet : Type<String> by Text {
@@ -75,7 +67,6 @@ sealed interface Type<T : Any?> {
 			override val codec: GenericType<java.util.UUID> get() = GenericType.UUID
 			override val type = "uuid"
 			override fun encode(value: java.util.UUID) = value.toString()
-			override fun decode(value: String): java.util.UUID = java.util.UUID.fromString(value)
 		}
 	}
 
@@ -86,28 +77,24 @@ sealed interface Type<T : Any?> {
 			override val codec: GenericType<kotlin.Byte> get() = GenericType.BYTE
 			override val type = "tinyint"
 			override fun encode(value: kotlin.Byte) = value.toString()
-			override fun decode(value: String) = value.toByte()
 		}
 
 		object Short : StatelessType<kotlin.Short>() {
 			override val codec: GenericType<kotlin.Short> get() = GenericType.SHORT
 			override val type = "smallint"
 			override fun encode(value: kotlin.Short) = value.toString()
-			override fun decode(value: String) = value.toShort()
 		}
 
 		object Int : StatelessType<kotlin.Int>() {
 			override val codec: GenericType<kotlin.Int> get() = GenericType.INTEGER
 			override val type = "int"
 			override fun encode(value: kotlin.Int) = value.toString()
-			override fun decode(value: String) = value.toInt()
 		}
 
 		object Long : StatelessType<kotlin.Long>() {
 			override val codec: GenericType<kotlin.Long> get() = GenericType.LONG
 			override val type = "bigint"
 			override fun encode(value: kotlin.Long) = value.toString()
-			override fun decode(value: String) = value.toLong()
 		}
 
 		object Counter : Type<kotlin.Long> by Long {
@@ -119,7 +106,6 @@ sealed interface Type<T : Any?> {
 			override val codec: GenericType<java.math.BigInteger> get() = GenericType.BIG_INTEGER
 			override val type = "varint"
 			override fun encode(value: java.math.BigInteger) = value.toString()
-			override fun decode(value: String): java.math.BigInteger = BigInteger(value)
 		}
 
 		//endregion
@@ -129,21 +115,18 @@ sealed interface Type<T : Any?> {
 			override val codec: GenericType<kotlin.Float> get() = GenericType.FLOAT
 			override val type = "float"
 			override fun encode(value: kotlin.Float) = value.toString()
-			override fun decode(value: String) = value.toFloat()
 		}
 
 		object Double : StatelessType<kotlin.Double>() {
 			override val codec: GenericType<kotlin.Double> get() = GenericType.DOUBLE
 			override val type = "double"
 			override fun encode(value: kotlin.Double) = value.toString()
-			override fun decode(value: String) = value.toDouble()
 		}
 
 		object BigDecimal : StatelessType<java.math.BigDecimal>() {
 			override val codec: GenericType<java.math.BigDecimal> get() = GenericType.BIG_DECIMAL
 			override val type = "decimal"
 			override fun encode(value: java.math.BigDecimal) = value.toString()
-			override fun decode(value: String) = BigDecimal(value)
 		}
 
 		//endregion
@@ -154,28 +137,24 @@ sealed interface Type<T : Any?> {
 			override val codec: GenericType<Instant> get() = GenericType.INSTANT
 			override val type = "timestamp"
 			override fun encode(value: Instant) = value.toString()
-			override fun decode(value: String): Instant = Instant.parse(value)
 		}
 
 		object Date : StatelessType<Instant>() {
 			override val codec: GenericType<Instant> get() = GenericType.INSTANT
 			override val type = "date"
 			override fun encode(value: Instant) = value.epochSecond.toString()
-			override fun decode(value: String): Instant = Instant.ofEpochSecond(value.toLong())
 		}
 
 		object Time : StatelessType<LocalTime>() {
 			override val codec: GenericType<LocalTime> get() = GenericType.LOCAL_TIME
 			override val type = "time"
 			override fun encode(value: LocalTime) = value.toString()
-			override fun decode(value: String): LocalTime = LocalTime.parse(value)
 		}
 
 		object Duration : StatelessType<java.time.Duration>() {
 			override val codec: GenericType<java.time.Duration> = GenericType.DURATION
 			override val type = "duration"
 			override fun encode(value: java.time.Duration) = value.toString()
-			override fun decode(value: String): java.time.Duration = java.time.Duration.parse(value)
 		}
 	}
 
@@ -186,7 +165,7 @@ sealed interface Type<T : Any?> {
 		 *
 		 * @see orNull
 		 */
-		class Nullable<T : Any>(val contents: Type<T>) : Type<T?> {
+		data class Nullable<T : Any>(val contents: Type<T>) : Type<T?> {
 			override val codec: GenericType<out T>
 				get() = contents.codec // In Cassandra, all types are nullable anyway
 
@@ -196,16 +175,38 @@ sealed interface Type<T : Any?> {
 			override fun encode(value: T?) =
 				if (value != null) contents.encode(value)
 				else "null"
+		}
 
-			override fun decode(value: String): T? =
-				if (value == "null") null
-				else contents.decode(value)
+		data class Set<T>(val contents: Type<T>) : Type<kotlin.collections.Set<T>> {
+			override val codec: GenericType<out kotlin.collections.Set<T>> = GenericType.setOf(contents.codec)
+
+			override val type: String
+				get() = "set<${contents.type}>"
+
+			override fun encode(value: kotlin.collections.Set<T>) =
+				value.joinToString(prefix = "{ ", postfix = " }", separator = ", ") { contents.encode(it) }
+		}
+
+		data class Map<K, V>(val key: Type<K>, val contents: Type<V>) : Type<kotlin.collections.Map<out K, V>> {
+			override val codec: GenericType<out MutableMap<out K, out V>> = GenericType.mapOf(key.codec, contents.codec)
+
+			val keyType = Set(key)
+
+			override val type: String
+				get() = "map<${key.type}, ${contents.type}>"
+
+			override fun encode(value: kotlin.collections.Map<out K, V>): String =
+				value.map { (k, v) -> "${key.encode(k)}: ${contents.encode(v)}" }
+					.joinToString(prefix = "{ ", postfix = " }", separator = ", ")
 		}
 
 	}
 
-	companion object {
+	companion object : WithLogger() {
 		fun fromCqlName(string: String): Type<*> {
+			log.trace { "Parsing type ‘$string’" }
+			val cleanedString = string.trim()
+
 			val simpleTypes = sequenceOf(
 				Binary.Text, Binary.TextASCII, Binary.Binary, Binary.Boolean, Binary.Inet, Binary.UUID,
 				Number.Byte, Number.Short, Number.Int, Number.Long, Number.BigInteger,
@@ -214,10 +215,25 @@ sealed interface Type<T : Any?> {
 				Dates.Timestamp, Dates.Date, Dates.Time, Dates.Duration,
 			)
 
-			val simpleResult = simpleTypes.find { it.type == string }
-			if (simpleResult != null)
-				return simpleResult
-			else error("Type '$string' could not be interpreted.")
+			val simpleResult = simpleTypes.find { it.type == cleanedString }
+			return when {
+				simpleResult != null -> simpleResult
+				cleanedString.startsWith("set") -> Set(fromCqlName(
+					cleanedString
+						.removePrefix("set")
+						.trimStart()
+						.removeSurrounding("<", ">")
+				))
+				cleanedString.startsWith("map") -> {
+					val cleanedMap =
+						cleanedString.removePrefix("map").trimStart().removeSurrounding("<", ">").split(",")
+					Map(
+						fromCqlName(cleanedMap[0]),
+						fromCqlName(cleanedMap[1]),
+					)
+				}
+				else -> error("The type ‘$cleanedString’ could not be recognized.")
+			}
 		}
 
 		fun <T : Any> Type<T>.orNull() = Collections.Nullable(this)
