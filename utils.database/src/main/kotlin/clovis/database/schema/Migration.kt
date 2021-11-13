@@ -132,13 +132,13 @@ private fun parseTableDeclaration(declaration: String, database: Database): Tabl
 	while (true) {
 		val columnName = scanner.next()
 		if (columnName == ")") break
-		val type = scanner.next().removeSuffix(",")
+		val type = scanner.nextLine().removeSuffix(",")
 
-		val column = RegularColumn(columnName, Type.fromCqlName(type))
+		val isPrimaryKey = type.endsWith("PRIMARY KEY")
 
-		if (scanner.hasNext("PRIMARY")) {
-			scanner.next().also { check(it == "PRIMARY") { "Expected 'PRIMARY', found '$it'" } }
-			scanner.next().also { check(it.startsWith("KEY")) { "Expected 'KEY', found '$it'" } }
+		val column = RegularColumn(columnName, Type.fromCqlName(type.removeSuffix(" PRIMARY KEY")))
+
+		if (isPrimaryKey) {
 			columns += PartitionKey(column)
 		} else {
 			columns += column
