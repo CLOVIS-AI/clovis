@@ -13,6 +13,7 @@ variables:
 
 include:
   - local: ".gitlab/ci/gradle.gitlab-ci.yml"
+  - local: ".gitlab/ci/docker.gitlab-ci.yml"
   - local: ".gitlab/ci/database.gitlab-ci.yml"
   - local: ".gitlab/ci/backend.gitlab-ci.yml"
   - local: ".gitlab/ci/test.gitlab-ci.yml"
