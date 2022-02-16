@@ -193,7 +193,7 @@ private suspend fun Database.createTable(table: Table) {
 	""".trimIndent()
 
 	val columns = table.columns
-		.joinToString(separator = ",\n    ") { "${it.name} ${it.type.type}" }
+		.joinToString(separator = ",\n\t") { "${it.name} ${it.type.type}" }
 
 	val partitionKeys = table.columns
 		.filterIsInstance<PartitionKey<*>>()

@@ -19,5 +19,11 @@ kotlin {
 				api(project(":money.core"))
 			}
 		}
+
+		val commonTest by getting {
+			dependencies {
+				implementation(project(":utils.test"))
+			}
+		}
 	}
 }
