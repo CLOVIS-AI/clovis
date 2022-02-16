@@ -1,0 +1,40 @@
+#region JVM-only
+
+.jvm-test:
+  extends: [ .gradle ]
+  needs: [ ]
+  stage: test
+
+  script: ./gradlew $module:test
+
+  artifacts:
+    reports:
+      junit: $module/build/test-results/**/TEST-*.xml
+    when: always
+    paths:
+      - $module/build/reports/tests
+  only:
+    - merge_requests
+    - main
+
+utils.database:test:
+  variables:
+    module: utils.database
+  extends: [ .jvm-test, .database ]
+
+remote.server:test:
+  variables:
+    module: remote.server
+  extends: [ .jvm-test, .database ]
+
+money.database:test:
+  variables:
+    module: money.database
+  extends: [ .jvm-test, .database ]
+
+backend:test:
+  variables:
+    module: backend
+  extends: [ .jvm-test, .database ]
+
+#endregion
