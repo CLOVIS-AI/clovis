@@ -1,0 +1,5 @@
+.database:
+  services:
+    - $cassandra_image
+  before_script:
+    - <utils.database/src/main/resources/application.gitlab.conf cat >>utils.database/src/main/resources/application.conf
