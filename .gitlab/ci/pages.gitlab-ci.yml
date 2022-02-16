@@ -1,0 +1,29 @@
+# Kotlin web UI for documentation
+dokka:
+  extends: [ .gradle ]
+  needs: [ ]
+  stage: build
+  script:
+    # 'assemble' is needed because of https://github.com/Kotlin/dokka/issues/1455
+    - "./gradlew assemble dokkaHtmlMultiModule"
+  artifacts:
+    paths:
+      - build/dokka/htmlMultiModule/
+  only:
+    - merge_requests
+    - main
+    - tags
+
+pages:
+  image: alpine:latest
+  stage: deploy
+  dependencies: [ dokka ]
+  needs: [ dokka ]
+  script:
+    - mkdir -p public/documentation
+    - mv build/dokka/htmlMultiModule/* public/documentation/
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
