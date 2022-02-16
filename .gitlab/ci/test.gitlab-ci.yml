@@ -38,3 +38,36 @@ backend:test:
   extends: [ .jvm-test, .database ]
 
 #endregion
+#region Multiplatform: JVM
+
+.jvm-multiplatform-test:
+  extends: [ .jvm-test ]
+
+  script: ./gradlew $module:jvmTest
+
+core.dsl:jvmTest:
+  variables:
+    module: core.dsl
+  extends: [ .jvm-multiplatform-test ]
+
+core.primitives:jvmTest:
+  variables:
+    module: core.primitives
+  extends: [ .jvm-multiplatform-test ]
+
+remote.core:jvmTest:
+  variables:
+    module: remote.core
+  extends: [ .jvm-multiplatform-test ]
+
+remote.client:jvmTest:
+  variables:
+    module: remote.client
+  extends: [ .jvm-multiplatform-test ]
+
+money.core:jvmTest:
+  variables:
+    module: money.core
+  extends: [ .jvm-multiplatform-test ]
+
+#endregion
