@@ -1,93 +1,19 @@
+stages:
+  - docker
+  - build
+  - test
+  - deploy
+  - notify
+
 variables:
-  OPENJDK_IMAGE: "openjdk:11"
-  CASSANDRA_IMAGE: "cassandra:4.0"
+  openjdk_image: "openjdk:11"
+  cassandra_image: "cassandra:4.0"
 
   clovis_jwt_secret: "secret"
 
-.gradle:
-  script: &prepare_gradle
-    - export GRADLE_USER_HOME=$(pwd)/.gradle
-  cache:
-    paths:
-      - .gradle/wrapper
-      - .gradle/caches
-
-.database:
-  services:
-    - $CASSANDRA_IMAGE
-  script: &prepare_database
-    - <utils.database/src/main/resources/application.gitlab.conf cat >>utils.database/src/main/resources/application.conf
-
-jvm:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle, .database ]
-  needs: [ ]
-  parallel:
-    matrix:
-      - MODULE: [ utils.database, remote.server, money.database, backend ]
-  before_script:
-    - *prepare_gradle
-    - *prepare_database
-  script:
-    - ./gradlew $MODULE:test
-  artifacts:
-    reports:
-      junit: $MODULE/build/test-results/**/TEST-*.xml
-    when: always
-    paths:
-      - $MODULE/build/reports/tests/
-
-multi-jvm:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle ]
-  needs: [ ]
-  parallel:
-    matrix:
-      - MODULE: [ core.dsl, core.primitives, remote.core, remote.client, money.core ]
-  before_script:
-    - *prepare_gradle
-  script:
-    - ./gradlew $MODULE:jvmTest
-  artifacts:
-    reports:
-      junit: $MODULE/build/test-results/**/TEST-*.xml
-    when: always
-    paths:
-      - $MODULE/build/reports/tests/
-
-dokka:
-  image: $OPENJDK_IMAGE
-  extends: [ .gradle ]
-  needs: [ ]
-  before_script:
-    - *prepare_gradle
-  script:
-    # 'assemble' is needed because of https://github.com/Kotlin/dokka/issues/1455
-    - "./gradlew assemble dokkaHtmlMultiModule"
-  artifacts:
-    paths:
-      - build/dokka/htmlMultiModule/
-
-telegram:
-  stage: deploy
-  image: registry.gitlab.com/clovis-ai/dotfiles:latest
-  needs: [ ]
-  script:
-    - git changelog --format telegram-html --incoming >changelog
-    - announce-telegram changelog "$CHAT_IDS"
-  only:
-    - main
-
-pages:
-  image: alpine:latest
-  stage: deploy
-  dependencies: [ dokka ]
-  needs: [ dokka ]
-  script:
-    - mkdir -p public/documentation
-    - mv build/dokka/htmlMultiModule/* public/documentation/
-  artifacts:
-    paths:
-      - public
-  only:
-    - main
+include:
+  - local: ".gitlab/ci/gradle.gitlab-ci.yml"
+  - local: ".gitlab/ci/database.gitlab-ci.yml"
+  - local: ".gitlab/ci/test.gitlab-ci.yml"
+  - local: ".gitlab/ci/telegram.gitlab-ci.yml"
+  - local: ".gitlab/ci/pages.gitlab-ci.yml"
