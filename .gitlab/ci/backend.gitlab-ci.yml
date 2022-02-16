@@ -1,0 +1,8 @@
+backend:build:
+  extends: [ .gradle ]
+  stage: build
+  script: ./gradlew backend:distTar
+  only:
+    - merge_requests
+    - main
+    - tags
