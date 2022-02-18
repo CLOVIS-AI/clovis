@@ -1,0 +1,31 @@
+backend:build:
+  extends: [ .gradle ]
+  stage: build
+  script: ./gradlew backend:distTar
+  artifacts:
+    paths:
+      - backend/build/distributions
+  only:
+    - merge_requests
+    - main
+    - tags
+
+.backend-docker:
+  variables:
+    image: $CI_REGISTRY_IMAGE/backend
+    dockerfile: backend/Dockerfile
+    docker_context: backend
+
+backend:build-docker:
+  extends: [ .docker-build, .backend-docker ]
+  stage: build
+  needs: [ backend:build ]
+  dependencies: [ backend:build ]
+
+backend:rename-latest:
+  extends: [ .docker-rename-latest, .backend-docker ]
+  needs: [ backend:build-docker ]
+
+backend:rename-tag:
+  extends: [ .docker-rename-tag, .backend-docker ]
+  needs: [ backend:build-docker ]
