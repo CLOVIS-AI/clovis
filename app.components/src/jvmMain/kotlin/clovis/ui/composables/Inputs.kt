@@ -6,7 +6,6 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import clovis.ui.modifier.Modifier
-import clovis.ui.modifier.asFoundation
 
 @Composable
 internal actual fun TextInputImpl(
@@ -19,7 +18,7 @@ internal actual fun TextInputImpl(
 	TextField(
 		text,
 		onValueChange = onChange,
-		modifier = modifier.asFoundation().modifier,
+		modifier = modifier.toFoundation(),
 		singleLine = !allowMultiline,
 	)
 }
@@ -35,7 +34,7 @@ internal actual fun PasswordInputImpl(
 	TextField(
 		password,
 		onValueChange = onChange,
-		modifier = modifier.asFoundation().modifier,
+		modifier = modifier.toFoundation(),
 		visualTransformation = passwordTranformation
 	)
 }

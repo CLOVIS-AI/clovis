@@ -11,8 +11,7 @@ internal actual fun ButtonImpl(
 	onClick: () -> Unit,
 	modifier: Modifier,
 	contents: @Composable () -> Unit,
-) {
-	//TODO apply modifier
+) = modifier.apply {
 	DomButton(attrs = {
 		this.onClick { onClick() }
 

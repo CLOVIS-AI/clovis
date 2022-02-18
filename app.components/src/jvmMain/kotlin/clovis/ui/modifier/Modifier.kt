@@ -2,17 +2,17 @@ package clovis.ui.modifier
 
 import androidx.compose.ui.Modifier as FoundationModifier
 
-private class ModifierElement : FoundationModifier.Element
+actual open class Modifier(
+	actual val parent: Modifier?,
+	private val foundationModifier: FoundationModifier,
+) {
 
-/**
- * Implementation of the [Modifier] multiplatform class that is used to convert calls to the equivalent [FoundationModifier] calls.
- */
-internal class ActualModifier : Modifier {
-	var modifier: FoundationModifier = ModifierElement()
+	/**
+	 * Converts the CLOVIS [Modifier] to a Jetpack Compose [Modifier][FoundationModifier].
+	 */
+	fun toFoundation() = asSequence()
+		.map { it.foundationModifier }
+		.fold(FoundationModifier.Companion as FoundationModifier) { acc, it -> acc.then(it) }
+
+	actual companion object : Modifier(null, FoundationModifier)
 }
-
-/**
- * Gets an implementation of the [ActualModifier].
- */
-internal fun Modifier.asFoundation(): ActualModifier =
-	(this as? ActualModifier) ?: ActualModifier()

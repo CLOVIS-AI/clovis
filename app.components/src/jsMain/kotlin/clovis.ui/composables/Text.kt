@@ -11,8 +11,7 @@ import org.jetbrains.compose.web.dom.Text as DomText
 internal actual fun TextImpl(
 	text: String,
 	modifier: Modifier,
-) {
-	//TODO handle the modifier
+) = modifier.apply {
 	DomParagraph(
 		attrs = {
 			style {

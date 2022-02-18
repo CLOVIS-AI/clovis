@@ -17,22 +17,23 @@ internal actual fun TextInputImpl(
 	allowMultiline: Boolean,
 	allowResize: Boolean
 ) {
-	//TODO modifier
-	if (!allowMultiline && !allowResize) {
-		DomTextInput(value = text) {
-			onInput { onChange(it.value) }
+	modifier.apply {
+		if (!allowMultiline && !allowResize) {
+			DomTextInput(value = text) {
+				onInput { onChange(it.value) }
 
-			style {
-				display(DisplayStyle.Block)
+				style {
+					display(DisplayStyle.Block)
+				}
 			}
-		}
-	} else {
-		TextArea(value = text) {
-			onInput { onChange(it.value) }
+		} else {
+			TextArea(value = text) {
+				onInput { onChange(it.value) }
 
-			rows(5)
-			style {
-				display(DisplayStyle.Block)
+				rows(5)
+				style {
+					display(DisplayStyle.Block)
+				}
 			}
 		}
 	}
@@ -44,12 +45,13 @@ internal actual fun PasswordInputImpl(
 	onChange: (String) -> Unit,
 	modifier: Modifier
 ) {
-	//TODO modifier
-	DomPasswordInput(value = password) {
-		onInput { onChange(it.value) }
+	modifier.apply {
+		DomPasswordInput(value = password) {
+			onInput { onChange(it.value) }
 
-		style {
-			display(DisplayStyle.Block)
+			style {
+				display(DisplayStyle.Block)
+			}
 		}
 	}
 }
