@@ -3,10 +3,10 @@ package clovis.app.login
 import androidx.compose.runtime.*
 import clovis.app.client
 import clovis.client.Client.Authenticated.Companion.createAccount
-import clovis.ui.composables.Button
 import clovis.ui.composables.PasswordInput
 import clovis.ui.composables.Text
 import clovis.ui.composables.TextInput
+import clovis.ui.composables.buttons.Button
 import clovis.ui.layout.Column
 import kotlinx.coroutines.launch
 

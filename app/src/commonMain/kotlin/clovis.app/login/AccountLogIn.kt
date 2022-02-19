@@ -3,10 +3,10 @@ package clovis.app.login
 import androidx.compose.runtime.*
 import clovis.app.client
 import clovis.client.Client.Authenticated.Companion.logIn
-import clovis.ui.composables.Button
 import clovis.ui.composables.PasswordInput
 import clovis.ui.composables.Text
 import clovis.ui.composables.TextInput
+import clovis.ui.composables.buttons.PrimaryActionButton
 import clovis.ui.layout.Column
 import kotlinx.coroutines.launch
 
@@ -24,7 +24,7 @@ fun AccountLogIn() {
 		Text("Password")
 		PasswordInput(password, onChange = { password = it })
 
-		Button(
+		PrimaryActionButton(
 			onClick = {
 				scope.launch {
 					client = client.logIn(email, password)
